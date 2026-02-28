@@ -142,7 +142,7 @@ function CTABanner({ variant = "default" }) {
       <p style={{ fontFamily: body, opacity: 0.8, marginBottom: "1.75rem", maxWidth: "28rem", margin: "0 auto 1.75rem" }}>
         Un premier échange sans engagement pour évaluer vos besoins.
       </p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+      <div style={{display: "flex", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center"}}>
         {[
           { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438"), primary: true },
           { icon: Mail, label: "Demander un devis", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
@@ -480,7 +480,7 @@ function ProblemSection() {
           title="Restaurer une maison ancienne ne s'improvise pas."
           subtitle="La majorité des surcoûts viennent d'erreurs de méthode :"
         />
-        <div className="grid md:grid-cols-2 gap-4 mb-12">
+        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:"1rem", marginBottom:"3rem"}}>
           {problems.map((p, i) => (
             <AnimDiv key={i} delay={i * 100} direction="left">
               <div style={{

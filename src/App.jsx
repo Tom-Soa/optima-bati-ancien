@@ -272,8 +272,8 @@ function Navbar({ currentPage, setPage }) {
         {/* CTA */}
         <button
           onClick={() => window.open("tel:+33677454438")}
-          className="hidden lg:flex items-center gap-2 rounded-xl text-white transition-all"
-          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 16px ${C.gold}44`, padding: "0.65rem 1.5rem", fontSize: "0.95rem", fontWeight: 600 }}
+          className="hidden lg:flex items-center gap-2 text-white transition-all"
+          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 16px ${C.gold}44`, padding: "0.7rem 1.75rem", fontSize: "1rem", fontWeight: 600, borderRadius: "2rem" }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
         >
@@ -318,8 +318,8 @@ function Navbar({ currentPage, setPage }) {
           ))}
           <button
             onClick={() => window.open("tel:+33677454438")}
-            className="flex items-center justify-center gap-2 w-full mt-3 py-3 rounded-lg text-white font-medium"
-            style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body }}
+            className="flex items-center justify-center gap-2 w-full text-white font-medium"
+            style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, marginTop: "0.75rem", padding: "0.9rem 1.5rem", borderRadius: "2rem", fontSize: "1rem", fontWeight: 600, boxShadow: `0 4px 16px ${C.gold}44` }}
           >
             <Phone size={16} /> Appeler maintenant
           </button>

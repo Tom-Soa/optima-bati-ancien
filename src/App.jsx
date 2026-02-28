@@ -135,6 +135,7 @@ function CTABanner({ variant = "default" }) {
         transform: inView ? "none" : "translateY(20px)",
         transition: "opacity 0.6s ease, transform 0.6s ease",
         padding: "3rem 2rem",
+        borderRadius: "1rem",
       }}
     >
       <h3 style={{ fontFamily: serif, fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)", fontWeight: 600, marginBottom: "0.75rem" }}>
@@ -271,8 +272,8 @@ function Navbar({ currentPage, setPage }) {
         {/* CTA */}
         <button
           onClick={() => window.open("tel:+33677454438")}
-          className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all"
-          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 12px ${C.gold}33` }}
+          className="hidden lg:flex items-center gap-2 rounded-lg text-white transition-all"
+          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 12px ${C.gold}44`, padding: "0.6rem 1.4rem", fontSize: "1rem", fontWeight: 500, letterSpacing: "0.01em" }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
         >

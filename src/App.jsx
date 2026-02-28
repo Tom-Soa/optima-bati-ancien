@@ -319,7 +319,7 @@ function Navbar({ currentPage, setPage }) {
           <button
             onClick={() => window.open("tel:+33677454438")}
             className="flex items-center justify-center gap-2 w-full text-white font-medium"
-            style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, marginTop: "0.75rem", padding: "0.9rem 1.5rem", borderRadius: "2rem", fontSize: "1rem", fontWeight: 600, boxShadow: `0 4px 16px ${C.gold}44` }}
+            style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, marginTop: "0.75rem", padding: "0.9rem 1.5rem", borderRadius: "2rem", fontSize: "1rem", fontWeight: 600, boxShadow: `0 4px 16px ${C.gold}44`, color: "#ffffff" }}
           >
             <Phone size={16} /> Appeler maintenant
           </button>
@@ -474,7 +474,7 @@ function HeroSection({ setPage }) {
 function ProblemSection() {
   const problems = [
     "Confusion entre logique du bâti ancien et moderne",
-    "Utilisation de matériaux inadaptés (ciment, isolations étanches…)",
+    "Utilisation de matériaux inadaptés",
     "Travaux inutiles ou excessifs",
     "Mauvais diagnostic de l'humidité",
   ];

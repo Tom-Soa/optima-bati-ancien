@@ -127,13 +127,14 @@ function CTABanner({ variant = "default" }) {
   return (
     <div
       ref={ref}
-      className="rounded-2xl p-8 md:p-12 text-center"
+      className="rounded-2xl text-center"
       style={{
         background: isDark ? C.dark : `linear-gradient(135deg, ${C.creamMid} 0%, ${C.border} 100%)`,
         color: isDark ? C.white : C.darkMid,
         opacity: inView ? 1 : 0,
         transform: inView ? "none" : "translateY(20px)",
         transition: "opacity 0.6s ease, transform 0.6s ease",
+        padding: "3rem 2rem",
       }}
     >
       <h3 style={{ fontFamily: serif, fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)", fontWeight: 600, marginBottom: "0.75rem" }}>
@@ -142,22 +143,25 @@ function CTABanner({ variant = "default" }) {
       <p style={{ fontFamily: body, opacity: 0.8, marginBottom: "1.75rem", maxWidth: "28rem", margin: "0 auto 1.75rem" }}>
         Un premier échange sans engagement pour évaluer vos besoins.
       </p>
-      <div style={{display: "flex", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center"}}>
+      <div style={{display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center", alignItems: "center", marginTop: "0.5rem"}}>
         {[
-          { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438"), primary: true },
+          { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438") },
           { icon: Mail, label: "Demander un devis", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
           { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438") },
         ].map((btn, i) => (
           <button
             key={i}
             onClick={btn.action}
-            className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all"
             style={{
-              fontFamily: body,
-              background: btn.primary ? `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})` : isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.6)",
-              color: btn.primary ? C.white : isDark ? C.white : C.darkMid,
-              border: btn.primary ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.2)" : C.border}`,
-              boxShadow: btn.primary ? `0 8px 20px ${C.gold}33` : "none",
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              padding: "0.75rem 1.5rem", borderRadius: "0.75rem",
+              fontFamily: body, fontSize: "1rem", fontWeight: 500,
+              cursor: "pointer", transition: "opacity 0.2s ease",
+              background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
+              color: C.white,
+              border: "none",
+              boxShadow: `0 4px 16px ${C.gold}44`,
+              whiteSpace: "nowrap",
             }}
             onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
             onMouseLeave={e => e.currentTarget.style.opacity = "1"}

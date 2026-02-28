@@ -272,8 +272,8 @@ function Navbar({ currentPage, setPage }) {
         {/* CTA */}
         <button
           onClick={() => window.open("tel:+33677454438")}
-          className="hidden lg:flex items-center gap-2 rounded-lg text-white transition-all"
-          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 12px ${C.gold}44`, padding: "0.6rem 1.4rem", fontSize: "1rem", fontWeight: 500, letterSpacing: "0.01em" }}
+          className="hidden lg:flex items-center gap-2 rounded-xl text-white transition-all"
+          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 16px ${C.gold}44`, padding: "0.65rem 1.5rem", fontSize: "0.95rem", fontWeight: 600 }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
         >
@@ -485,7 +485,7 @@ function ProblemSection() {
           title="Restaurer une maison ancienne ne s'improvise pas."
           subtitle="La majorité des surcoûts viennent d'erreurs de méthode :"
         />
-        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:"1rem", marginBottom:"3rem"}}>
+        <div style={{display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"1rem", marginBottom:"3rem", maxWidth:"100%"}}>
           {problems.map((p, i) => (
             <AnimDiv key={i} delay={i * 100} direction="left">
               <div style={{
@@ -531,7 +531,7 @@ function PromiseSection() {
           title={<>La meilleure solution n'est pas la plus chère.<br /><span style={{ color: C.goldDark }}>C'est celle qui respecte le bâtiment.</span></>}
           subtitle="Le bâti ancien fonctionne différemment :"
         />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1.5rem", marginBottom:"3rem"}}>
           {principles.map((item, i) => (
             <AnimDiv key={i} delay={i * 100}>
               <div
@@ -599,7 +599,7 @@ function ErreursPage({ setPage }) {
     <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
       <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
         <SectionTitle title="Les erreurs les plus coûteuses" subtitle="En bâti ancien, certaines interventions semblent logiques mais sont en réalité dévastatrices." />
-        <div className="grid md:grid-cols-2 gap-6 mb-16">
+        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
           {erreurs.map((e, i) => (
             <AnimDiv key={i} delay={i * 80}>
               <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "1.75rem", height: "100%" }}>
@@ -639,7 +639,7 @@ function MethodePage({ setPage }) {
     <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
       <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
         <SectionTitle title="La méthode OPTIMA" subtitle="Une approche rigoureuse en 4 étapes pour restaurer sans gaspiller." />
-        <div className="grid md:grid-cols-2 gap-6 mb-16">
+        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
           {steps.map((s, i) => (
             <AnimDiv key={i} delay={i * 100}>
               <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "2rem" }}>
@@ -658,7 +658,7 @@ function MethodePage({ setPage }) {
         <AnimDiv>
           <div style={{ background: C.dark, borderRadius: "1rem", padding: "2.5rem 3rem", marginBottom: "3rem" }}>
             <p style={{ fontFamily: serif, fontSize: "1.1rem", color: C.white, textAlign: "center", marginBottom: "2rem" }}>Domaines d'expertise</p>
-            <div className="grid sm:grid-cols-4 gap-4">
+            <div className="resp-grid-4" style={{display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"1rem"}}>
               {expertises.map((e, i) => (
                 <div key={i} style={{ textAlign: "center" }}>
                   <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${C.gold}22`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 0.75rem" }}>
@@ -691,7 +691,7 @@ function TarifsPage({ setPage }) {
     <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
       <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
         <SectionTitle title="Tarifs & Prestations" subtitle="Des interventions adaptées à chaque situation, sans engagement inutile." />
-        <div className="grid md:grid-cols-3 gap-5 mb-16">
+        <div className="resp-grid-3" style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.25rem", marginBottom:"4rem"}}>
           {offers.map((o, i) => (
             <AnimDiv key={i} delay={i * 80}>
               <div style={{
@@ -760,7 +760,7 @@ function ChateauxPage({ setPage }) {
               <AlertTriangle size={22} style={{ color: "#f87171" }} />
               <h3 style={{ fontFamily: serif, fontSize: "1.2rem", fontWeight: 600, color: C.dark }}>Un bâtiment historique mal restauré peut perdre :</h3>
             </div>
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"0.75rem"}}>
               {risks.map((r, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: C.white, borderRadius: "0.75rem", padding: "1rem 1.25rem", border: "1px solid rgba(252,165,165,0.25)" }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f87171", flexShrink: 0 }} />
@@ -772,7 +772,7 @@ function ChateauxPage({ setPage }) {
         </AnimDiv>
 
         <SectionTitle title="Le rôle de l'expert" subtitle="Intervenir avant, pendant et après les travaux pour protéger votre patrimoine." />
-        <div className="grid sm:grid-cols-2 gap-4 mb-16">
+        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1rem", marginBottom:"4rem"}}>
           {roles.map((r, i) => (
             <AnimDiv key={i} delay={i * 80}>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.white, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "1.5rem" }}>
@@ -803,7 +803,7 @@ function ProjetsPage({ setPage }) {
     <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
       <div style={{ maxWidth: "72rem", margin: "0 auto", padding: "0 2rem" }}>
         <SectionTitle title="Projets & Réalisations" subtitle="Une sélection de chantiers emblématiques et d'actions de terrain." />
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="resp-grid-3" style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
           {projects.map((p, i) => (
             <AnimDiv key={i} delay={i * 80}>
               <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: `1px solid ${C.border}`, background: C.white, transition: "box-shadow 0.3s ease" }}
@@ -850,7 +850,7 @@ function ConferencesPage({ setPage }) {
             Objectif : rendre la restauration plus simple, plus naturelle et plus sereine.
           </p>
         </AnimDiv>
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="resp-grid-3" style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
           {formats.map((f, i) => (
             <AnimDiv key={i} delay={i * 120}>
               <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "1rem", padding: "2.5rem 2rem", textAlign: "center", transition: "box-shadow 0.3s ease" }}
@@ -888,7 +888,7 @@ function AProposPage({ setPage }) {
     <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
       <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
         <SectionTitle title="À propos" subtitle="Laurent de Boislorey — Expert et maçon spécialisé." />
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
+        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"3rem", alignItems:"center", marginBottom:"4rem"}}>
           <AnimDiv direction="left">
             <div style={{ borderRadius: "1rem", overflow: "hidden", aspectRatio: "4/5", background: C.border }}>
               <img
@@ -961,7 +961,7 @@ function ContactPage() {
       <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
         <SectionTitle title="Parlons de votre projet." subtitle="Un premier échange sans engagement pour évaluer vos besoins." />
 
-        <div className="grid md:grid-cols-5 gap-8 mb-16">
+        <div className="resp-grid-contact" style={{display:"grid", gridTemplateColumns:"2fr 3fr", gap:"2rem", marginBottom:"4rem"}}>
           {/* Info */}
           <div style={{ gridColumn: "span 2" }} className="space-y-4">
             {contactInfo.map((c, i) => (
@@ -1100,27 +1100,27 @@ export default function App() {
         @media (min-width: 1024px) { .hidden.lg\\:flex { display: flex !important; } .hidden.lg\\:block { display: block !important; } }
         .space-y-4 > * + * { margin-top: 1rem; }
         .grid { display: grid; }
-        .grid.md\\:grid-cols-2 { grid-template-columns: repeat(1, 1fr); }
-        .grid.md\\:grid-cols-3 { grid-template-columns: repeat(1, 1fr); }
-        .grid.md\\:grid-cols-5 { grid-template-columns: repeat(1, 1fr); }
-        .grid.sm\\:grid-cols-2 { grid-template-columns: repeat(1, 1fr); }
-        .grid.sm\\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
-        .grid.lg\\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+        .grid.md\:grid-cols-2 { grid-template-columns: repeat(1, 1fr); }
+        .grid.md\:grid-cols-3 { grid-template-columns: repeat(1, 1fr); }
+        .grid.md\:grid-cols-5 { grid-template-columns: repeat(1, 1fr); }
+        .grid.sm\:grid-cols-2 { grid-template-columns: repeat(1, 1fr); }
+        .grid.sm\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+        .grid.lg\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
         @media (min-width: 640px) {
-          .grid.sm\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-          .grid.sm\\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+          .grid.sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+          .grid.sm\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
         }
         @media (min-width: 768px) {
-          .grid.md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-          .grid.md\\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-          .grid.md\\:grid-cols-5 { grid-template-columns: 2fr 3fr; }
-          .md\\:col-span-3 { grid-column: span 3; }
+          .grid.md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+          .grid.md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+          .grid.md\:grid-cols-5 { grid-template-columns: 2fr 3fr; }
+          .md\:col-span-3 { grid-column: span 3; }
         }
         @media (min-width: 1024px) {
-          .grid.lg\\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-          .hidden.lg\\:flex { display: flex !important; }
-          .hidden.lg\\:block { display: block !important; }
-          .lg\\:hidden { display: none !important; }
+          .grid.lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+          .hidden.lg\:flex { display: flex !important; }
+          .hidden.lg\:block { display: block !important; }
+          .lg\:hidden { display: none !important; }
         }
         .items-center { align-items: center; }
         .items-start { align-items: flex-start; }
@@ -1134,6 +1134,17 @@ export default function App() {
         .relative { position: relative; }
         .absolute { position: absolute; }
         select option { background: white; color: #3d362e; }
+        @media (max-width: 767px) {
+          .resp-grid-2 { grid-template-columns: repeat(1,1fr) !important; }
+          .resp-grid-3 { grid-template-columns: repeat(1,1fr) !important; }
+          .resp-grid-contact { grid-template-columns: repeat(1,1fr) !important; }
+          .resp-grid-4 { grid-template-columns: repeat(2,1fr) !important; }
+        }
+        section + section { margin-top: 0; }
+        .section-gap { margin-bottom: 4rem; }
+        @media (max-width: 480px) {
+          .resp-grid-4 { grid-template-columns: repeat(1,1fr) !important; }
+        }
       `}</style>
       <div style={{ minHeight: "100vh", background: C.cream, fontFamily: body }}>
         <Navbar currentPage={currentPage} setPage={setPage} />

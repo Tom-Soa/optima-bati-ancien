@@ -121,53 +121,57 @@ function SectionTitle({ title, subtitle, align = "center", light = false }) {
   );
 }
 
-function CTABanner({ variant = "default" }) {
+function CTABanner({ variant = "default", setPage }) {
   const [ref, inView] = useInView(0.1);
   const isDark = variant === "dark";
+  const btns = [
+    { icon: Phone, label: "Appeler", action: () => window.open("tel:+33677454438"), primary: true },
+    { icon: Mail, label: "Demander un devis", action: () => setPage ? setPage("contact") : window.open("mailto:optimaexpertise46@gmail.com"), primary: true },
+    { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438"), primary: false },
+  ];
   return (
     <div
       ref={ref}
-      className="rounded-2xl text-center"
       style={{
-        background: isDark ? C.dark : `linear-gradient(135deg, ${C.creamMid} 0%, ${C.border} 100%)`,
-        color: isDark ? C.white : C.darkMid,
+        background: isDark ? C.dark : C.creamMid,
+        borderTop: isDark ? "none" : `1px solid ${C.border}`,
+        borderBottom: isDark ? "none" : `1px solid ${C.border}`,
         opacity: inView ? 1 : 0,
         transform: inView ? "none" : "translateY(20px)",
         transition: "opacity 0.6s ease, transform 0.6s ease",
         padding: "3rem 2rem",
-        borderRadius: "1rem",
+        textAlign: "center",
       }}
     >
-      <h3 style={{ fontFamily: serif, fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)", fontWeight: 600, marginBottom: "0.75rem" }}>
+      <h3 style={{ fontFamily: serif, fontSize: "clamp(1.35rem, 2.5vw, 1.8rem)", fontWeight: 600, marginBottom: "0.5rem", color: isDark ? C.white : C.dark }}>
         Parlons de votre projet
       </h3>
-      <p style={{ fontFamily: body, opacity: 0.8, marginBottom: "1.75rem", maxWidth: "28rem", margin: "0 auto 1.75rem" }}>
+      <p style={{ fontFamily: body, color: isDark ? "rgba(255,255,255,0.65)" : C.mid, marginBottom: "1.75rem", maxWidth: "26rem", margin: "0 auto 1.75rem", fontSize: "0.95rem", lineHeight: 1.7 }}>
         Un premier échange sans engagement pour évaluer vos besoins.
       </p>
-      <div style={{display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center", alignItems: "center", marginTop: "0.5rem"}}>
-        {[
-          { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438") },
-          { icon: Mail, label: "Demander un devis", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
-          { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438") },
-        ].map((btn, i) => (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", justifyContent: "center", alignItems: "center" }}>
+        {btns.map((btn, i) => (
           <button
             key={i}
             onClick={btn.action}
             style={{
               display: "flex", alignItems: "center", gap: "0.5rem",
-              padding: "0.75rem 1.5rem", borderRadius: "0.75rem",
-              fontFamily: body, fontSize: "1rem", fontWeight: 500,
-              cursor: "pointer", transition: "opacity 0.2s ease",
-              background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
-              color: C.white,
-              border: "none",
-              boxShadow: `0 4px 16px ${C.gold}44`,
+              padding: "0.7rem 1.4rem",
+              borderRadius: "0.35rem",
+              fontFamily: body, fontSize: "0.9rem", fontWeight: 500,
+              cursor: "pointer", transition: "opacity 0.18s ease",
+              background: btn.primary
+                ? `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`
+                : isDark ? "rgba(255,255,255,0.08)" : "rgba(61,54,46,0.07)",
+              color: btn.primary ? C.white : isDark ? "rgba(255,255,255,0.7)" : C.mid,
+              border: btn.primary ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.15)" : C.border}`,
+              boxShadow: btn.primary ? `0 4px 14px ${C.gold}40` : "none",
               whiteSpace: "nowrap",
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
             onMouseLeave={e => e.currentTarget.style.opacity = "1"}
           >
-            <btn.icon size={16} />
+            <btn.icon size={14} />
             {btn.label}
           </button>
         ))}
@@ -205,10 +209,16 @@ const navLinks = [
   { label: "Contact", page: "contact" },
 ];
 
+// Desktop nav shows only primary links; secondary in a "•••" dropdown
+const primaryLinks = ["erreurs", "methode", "tarifs", "contact"];
+const secondaryLinks = ["chateaux", "projets", "conferences", "apropos"];
+
 function Navbar({ currentPage, setPage }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const isHome = currentPage === "home";
+  const isLight = !isHome || scrolled;
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -216,75 +226,152 @@ function Navbar({ currentPage, setPage }) {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const navBg = (!isHome || scrolled)
-    ? "rgba(255,252,249,0.97)"
-    : "transparent";
-  const borderBottom = (!isHome || scrolled) ? `1px solid ${C.border}` : "none";
+  // close "more" dropdown on outside click
+  useEffect(() => {
+    if (!moreOpen) return;
+    const close = () => setMoreOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [moreOpen]);
+
+  const textColor = isLight ? C.dark : C.white;
+  const mutedColor = isLight ? C.mid : "rgba(255,255,255,0.7)";
+  const activeColor = isLight ? C.goldDark : C.gold;
+  const activeBg = isLight ? `${C.gold}16` : "rgba(255,255,255,0.1)";
 
   return (
     <header style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: navBg,
-      borderBottom,
-      backdropFilter: (!isHome || scrolled) ? "blur(12px)" : "none",
+      background: isLight ? "rgba(255,252,249,0.97)" : "transparent",
+      borderBottom: isLight ? `1px solid ${C.border}` : "none",
+      backdropFilter: isLight ? "blur(14px)" : "none",
       transition: "background 0.3s ease, border-color 0.3s ease",
     }}>
-      <nav style={{ maxWidth: "80rem", margin: "0 auto", padding: "0 2rem", height: "4rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ maxWidth: "80rem", margin: "0 auto", padding: "0 2rem", height: "3.75rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1.5rem" }}>
+
         {/* Logo */}
-        <button onClick={() => { setPage("home"); setMenuOpen(false); }} style={{ background: "none", border: "none", cursor: "pointer" }}>
-          <span style={{
-            fontFamily: serif,
-            fontWeight: 700,
-            fontSize: "1.05rem",
-            color: (!isHome || scrolled) ? C.dark : C.white,
-            letterSpacing: "0.01em",
-          }}>
-            Laurent de Boislorey <span style={{ color: C.gold }}>|</span> OPTIMA
+        <button onClick={() => { setPage("home"); setMenuOpen(false); }} style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}>
+          <span style={{ fontFamily: serif, fontWeight: 700, fontSize: "1rem", color: textColor, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
+            Laurent de Boislorey <span style={{ color: C.gold, margin: "0 0.15rem" }}>·</span> <span style={{ fontWeight: 400, letterSpacing: "0.08em", fontSize: "0.8rem", color: isLight ? C.goldDark : C.gold }}>OPTIMA</span>
           </span>
         </button>
 
-        {/* Desktop links */}
-        <div className="hidden lg:flex items-center gap-1">
-          {navLinks.map(link => (
+        {/* Desktop — primary links */}
+        <div className="hidden lg:flex items-center" style={{ gap: "0.15rem", flex: 1, justifyContent: "center" }}>
+          {navLinks.filter(l => primaryLinks.includes(l.page)).map(link => {
+            const active = currentPage === link.page;
+            return (
+              <button
+                key={link.page}
+                onClick={() => setPage(link.page)}
+                style={{
+                  background: active ? activeBg : "none",
+                  border: "none", cursor: "pointer",
+                  padding: "0.45rem 0.9rem",
+                  borderRadius: "0.4rem",
+                  fontFamily: body, fontSize: "0.875rem", fontWeight: active ? 600 : 400,
+                  color: active ? activeColor : mutedColor,
+                  transition: "all 0.18s ease",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.color = textColor; e.currentTarget.style.background = activeBg; } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.color = mutedColor; e.currentTarget.style.background = "none"; } }}
+              >
+                {link.label}
+              </button>
+            );
+          })}
+
+          {/* More dropdown */}
+          <div style={{ position: "relative" }}>
             <button
-              key={link.page}
-              onClick={() => setPage(link.page)}
+              onClick={e => { e.stopPropagation(); setMoreOpen(o => !o); }}
               style={{
-                background: currentPage === link.page
-                  ? (!isHome || scrolled) ? `${C.gold}18` : "rgba(255,255,255,0.12)"
-                  : "none",
+                background: secondaryLinks.includes(currentPage) ? activeBg : "none",
                 border: "none", cursor: "pointer",
-                padding: "0.4rem 0.75rem", borderRadius: "0.5rem",
-                fontFamily: body, fontSize: "0.9rem", fontWeight: 500,
-                color: currentPage === link.page
-                  ? (!isHome || scrolled) ? C.goldDark : C.gold
-                  : (!isHome || scrolled) ? C.mid : "rgba(255,255,255,0.8)",
-                transition: "all 0.2s ease",
+                padding: "0.45rem 0.75rem", borderRadius: "0.4rem",
+                fontFamily: body, fontSize: "0.875rem", fontWeight: 400,
+                color: secondaryLinks.includes(currentPage) ? activeColor : mutedColor,
+                display: "flex", alignItems: "center", gap: "0.35rem",
+                transition: "all 0.18s ease",
               }}
-              onMouseEnter={e => { if (currentPage !== link.page) e.currentTarget.style.background = (!isHome || scrolled) ? C.creamMid : "rgba(255,255,255,0.1)"; }}
-              onMouseLeave={e => { if (currentPage !== link.page) e.currentTarget.style.background = "none"; }}
+              onMouseEnter={e => { e.currentTarget.style.color = textColor; }}
+              onMouseLeave={e => { e.currentTarget.style.color = secondaryLinks.includes(currentPage) ? activeColor : mutedColor; }}
             >
-              {link.label}
+              Plus
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.6, transform: moreOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </button>
-          ))}
+            {moreOpen && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 0.5rem)", right: 0,
+                background: "rgba(255,252,249,0.98)", backdropFilter: "blur(12px)",
+                border: `1px solid ${C.border}`, borderRadius: "0.75rem",
+                padding: "0.4rem", minWidth: "160px",
+                boxShadow: "0 8px 32px rgba(61,54,46,0.12)",
+                zIndex: 200,
+              }}>
+                {navLinks.filter(l => secondaryLinks.includes(l.page)).map(link => (
+                  <button
+                    key={link.page}
+                    onClick={() => { setPage(link.page); setMoreOpen(false); }}
+                    style={{
+                      display: "block", width: "100%", textAlign: "left",
+                      padding: "0.55rem 0.9rem", borderRadius: "0.5rem",
+                      background: currentPage === link.page ? `${C.gold}16` : "none",
+                      border: "none", cursor: "pointer",
+                      fontFamily: body, fontSize: "0.875rem",
+                      color: currentPage === link.page ? C.goldDark : C.mid,
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = C.creamMid}
+                    onMouseLeave={e => e.currentTarget.style.background = currentPage === link.page ? `${C.gold}16` : "none"}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={() => window.open("tel:+33677454438")}
-          className="hidden lg:flex items-center gap-2 text-white transition-all"
-          style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, boxShadow: `0 4px 16px ${C.gold}44`, padding: "0.7rem 1.75rem", fontSize: "1rem", fontWeight: 600, borderRadius: "2rem" }}
-          onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-        >
-          <Phone size={14} /> Appeler
-        </button>
+        {/* CTA — Appeler */}
+        <div className="hidden lg:flex items-center" style={{ gap: "0.75rem", flexShrink: 0 }}>
+          <button
+            onClick={() => setPage("contact")}
+            style={{
+              background: "none", border: `1px solid ${isLight ? C.border : "rgba(255,255,255,0.25)"}`,
+              cursor: "pointer", fontFamily: body, fontSize: "0.875rem", fontWeight: 500,
+              color: mutedColor, padding: "0.5rem 1rem", borderRadius: "0.4rem",
+              transition: "all 0.18s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.color = C.goldDark; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = isLight ? C.border : "rgba(255,255,255,0.25)"; e.currentTarget.style.color = mutedColor; }}
+          >
+            Devis
+          </button>
+          <button
+            onClick={() => window.open("tel:+33677454438")}
+            style={{
+              background: C.dark, border: "none", cursor: "pointer",
+              fontFamily: body, fontSize: "0.875rem", fontWeight: 600,
+              color: C.white, padding: "0.5rem 1.1rem", borderRadius: "0.4rem",
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              transition: "opacity 0.18s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          >
+            <Phone size={13} /> Appeler
+          </button>
+        </div>
 
         {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="lg:hidden"
-          style={{ background: "none", border: "none", cursor: "pointer", color: (!isHome || scrolled) ? C.dark : C.white, padding: "0.5rem" }}
+          style={{ background: "none", border: "none", cursor: "pointer", color: textColor, padding: "0.5rem" }}
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -310,7 +397,7 @@ function Navbar({ currentPage, setPage }) {
                 border: "none", cursor: "pointer",
                 fontFamily: body, fontSize: "1rem",
                 color: currentPage === link.page ? C.goldDark : C.mid,
-                marginBottom: "0.2rem",
+                marginBottom: "0.15rem",
               }}
             >
               {link.label}
@@ -318,8 +405,7 @@ function Navbar({ currentPage, setPage }) {
           ))}
           <button
             onClick={() => window.open("tel:+33677454438")}
-            className="flex items-center justify-center gap-2 w-full text-white font-medium"
-            style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, marginTop: "0.75rem", padding: "0.9rem 1.5rem", borderRadius: "2rem", fontSize: "1rem", fontWeight: 600, boxShadow: `0 4px 16px ${C.gold}44`, color: "#ffffff" }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%", background: C.dark, border: "none", cursor: "pointer", fontFamily: body, marginTop: "0.75rem", padding: "0.9rem 1.5rem", borderRadius: "0.4rem", fontSize: "1rem", fontWeight: 600, color: "#ffffff" }}
           >
             <Phone size={16} /> Appeler maintenant
           </button>
@@ -490,9 +576,13 @@ function ProblemSection() {
             <AnimDiv key={i} delay={i * 100} direction="left">
               <div style={{
                 display: "flex", alignItems: "flex-start", gap: "1rem",
-                padding: "1.25rem 1.5rem", borderRadius: "0.75rem",
-                background: "rgba(254,242,242,0.6)",
-                border: "1px solid rgba(252,165,165,0.35)",
+                padding: "1.25rem 1.5rem",
+                borderRadius: "0",
+                borderLeft: "3px solid #f87171",
+                background: "rgba(254,242,242,0.5)",
+                border: "1px solid rgba(252,165,165,0.3)",
+                borderLeftWidth: "3px",
+                borderLeftColor: "#f87171",
               }}>
                 <X size={18} style={{ color: "#f87171", flexShrink: 0, marginTop: "2px" }} />
                 <p style={{ fontFamily: body, color: C.darkMid, fontSize: "1rem", lineHeight: 1.6 }}>{p}</p>
@@ -587,35 +677,183 @@ function HomePage({ setPage }) {
 // ─── Page: Erreurs ────────────────────────────────────────────────────────────
 
 function ErreursPage({ setPage }) {
+  const [openIdx, setOpenIdx] = useState(null);
+
   const erreurs = [
-    { title: "Le ciment sur la pierre", desc: "Emprisonner l'humidité dans les murs en pierre avec du ciment cause des dégâts structurels irréversibles sur le long terme." },
-    { title: "L'isolation intérieure étanche", desc: "Supprimer la capacité des murs à respirer perturbe l'équilibre hygrométrique et entraîne moisissures et condensation." },
-    { title: "Traiter l'humidité par injection", desc: "Dans 90% des cas, les injections anti-humidité sont inutiles. Le vrai diagnostic révèle des causes différentes." },
-    { title: "Changer les fenêtres en premier", desc: "Remplacer les menuiseries sans comprendre le bâti aggrave souvent les problèmes thermiques au lieu de les résoudre." },
-    { title: "Faire appel à des artisans non spécialisés", desc: "Un artisan non formé au bâti ancien applique des techniques modernes inadaptées, générant surcoûts et dégradations." },
-    { title: "Négliger les toitures et soubassements", desc: "80% des problèmes d'humidité viennent du toit ou du sol. Commencer ailleurs est une perte d'argent certaine." },
+    {
+      num: "01",
+      accroche: "Le ciment emprisonne l'humidité",
+      title: "L'emploi du ciment",
+      intro: "Le ciment est incompatible avec la construction ancienne : il ne respire pas, n'est pas souple, et constitue un véritable piège à eau.",
+      detail: "Contrairement aux idées reçues, le ciment n'est pas étanche. Il laisse entrer l'eau mais ne la laisse pas sortir. Résultat : des maisons humides, donc froides, qui favorisent le développement de pathologies graves.",
+      consequences: [
+        "Maison inchauffable — l'énergie sert à évaporer l'eau",
+        "Développement de champignons (mérule…)",
+        "Prolifération d'insectes xylophages (capricornes…)",
+      ],
+      color: "#c0392b",
+    },
+    {
+      num: "02",
+      accroche: "10 % d'humidité en trop = maison inchauffable",
+      title: "Ignorer l'humidité venant du sol",
+      intro: "9 fois sur 10, l'humidité entre par le sol et les bas de murs. Les dispositifs protecteurs des Anciens ont été détruits par des travaux modernes.",
+      detail: "La maison ancienne repose sur des « assises » en contact direct avec la terre. Caniveaux respirants, puits perdus, vides sanitaires — ces systèmes ont été condamnés, rendant les maisons humides.",
+      consequences: [
+        "Affaissement des murs par destructuration du sol",
+        "Maison inchauffable et très coûteuse à chauffer",
+        "Champignons et insectes qui prolifèrent",
+      ],
+      color: "#c0392b",
+    },
+    {
+      num: "03",
+      accroche: "Un bâti ancien obéit à sa propre logique",
+      title: "Modifier la structure sans la comprendre",
+      intro: "Le bâti ancien est souple, équilibré par des poussées et contre-poussées. Les travaux modernes mal conçus brisent cet équilibre.",
+      detail: "Ouvertures non maîtrisées, dalles béton, chaînages inadaptés — ce qui semblait une amélioration devient une source de pathologies structurelles graves.",
+      consequences: [
+        "Surcharges et affaissements des assises",
+        "Éventrements de murs",
+        "Ruptures de linteaux",
+      ],
+      color: "#c0392b",
+    },
+    {
+      num: "04",
+      accroche: "En moyenne 40 % économisés avec un expert",
+      title: "Ne pas faire appel à un expert indépendant",
+      intro: "« Ce qui est mal pensé coûte deux fois à faire. » Un expert indépendant est payé au devis — pas au pourcentage des travaux.",
+      detail: "Il rédige des préconisations précises, définit le projet selon VOS attentes, et répond en temps réel aux questions techniques. Résultat : moins de travaux inutiles, plus d'efficacité.",
+      consequences: [
+        "40 % d'économies en moyenne sur les travaux",
+        "Chantiers bien pensés dès le départ",
+        "Un projet conforme à vos attentes",
+      ],
+      color: C.goldDark,
+    },
   ];
+
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle title="Les erreurs les plus coûteuses" subtitle="En bâti ancien, certaines interventions semblent logiques mais sont en réalité dévastatrices." />
-        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
-          {erreurs.map((e, i) => (
-            <AnimDiv key={i} delay={i * 80}>
-              <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "1.75rem", height: "100%" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f87171", flexShrink: 0, marginTop: "0.55rem" }} />
-                  <div>
-                    <h3 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 600, color: C.dark, marginBottom: "0.5rem" }}>{e.title}</h3>
-                    <p style={{ fontFamily: body, color: C.mid, fontSize: "0.95rem", lineHeight: 1.65 }}>{e.desc}</p>
+    <div style={{ background: C.cream, paddingTop: "3.75rem" }}>
+
+      {/* Hero sombre */}
+      <section style={{
+        background: C.dark,
+        padding: "5rem 2rem 4rem",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* Orbe décorative */}
+        <div style={{ position: "absolute", top: "-4rem", right: "-4rem", width: "28rem", height: "28rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}18 0%, transparent 70%)`, pointerEvents: "none" }} />
+        <div style={{ maxWidth: "56rem", margin: "0 auto", position: "relative", zIndex: 1 }}>
+          <AnimDiv direction="up">
+            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold, marginBottom: "1.25rem" }}>
+              Les 4 erreurs majeures du bâti ancien
+            </p>
+            <h1 style={{ fontFamily: serif, fontSize: "clamp(2rem, 5vw, 3.25rem)", fontWeight: 700, color: C.white, lineHeight: 1.15, marginBottom: "1.5rem", maxWidth: "44rem" }}>
+              Ce qui coûte le plus cher,<br />c'est ce qui semblait logique.
+            </h1>
+            <p style={{ fontFamily: body, fontSize: "1.05rem", color: "rgba(255,255,255,0.6)", maxWidth: "38rem", lineHeight: 1.75 }}>
+              En bâti ancien, les interventions modernes sont souvent inadaptées. Chacune de ces erreurs peut coûter des dizaines de milliers d'euros — parfois sans retour possible.
+            </p>
+          </AnimDiv>
+
+          {/* 4 chiffres */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", marginTop: "3.5rem", background: "rgba(255,255,255,0.08)" }}>
+            {erreurs.map((e, i) => (
+              <button
+                key={i}
+                onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                style={{
+                  background: openIdx === i ? `${C.gold}15` : "transparent",
+                  border: "none", cursor: "pointer", padding: "1.5rem 1rem",
+                  textAlign: "left", transition: "background 0.2s",
+                }}
+              >
+                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "2rem", fontWeight: 700, color: openIdx === i ? C.gold : "rgba(255,255,255,0.2)", lineHeight: 1, marginBottom: "0.5rem" }}>{e.num}</p>
+                <p style={{ fontFamily: body, fontSize: "0.8rem", color: openIdx === i ? C.gold : "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>{e.accroche}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Accordéon erreurs */}
+      <div style={{ maxWidth: "56rem", margin: "0 auto", padding: "0 2rem 5rem" }}>
+        {erreurs.map((e, i) => {
+          const isOpen = openIdx === i;
+          const isLast = i === 3;
+          return (
+            <AnimDiv key={i} delay={i * 60}>
+              <div style={{ borderBottom: `1px solid ${C.border}` }}>
+                {/* Header cliquable */}
+                <button
+                  onClick={() => setOpenIdx(isOpen ? null : i)}
+                  style={{
+                    width: "100%", background: "none", border: "none",
+                    cursor: "pointer", padding: "1.75rem 0",
+                    display: "flex", alignItems: "center", gap: "1.25rem",
+                    textAlign: "left",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "'DM Mono', monospace", fontSize: "0.7rem",
+                    color: isOpen ? (isLast ? C.goldDark : e.color) : C.light,
+                    minWidth: "2rem", transition: "color 0.2s",
+                  }}>{e.num}</span>
+                  <h2 style={{
+                    fontFamily: serif, fontSize: "clamp(1.05rem, 2.2vw, 1.3rem)",
+                    fontWeight: 600, color: isOpen ? C.dark : C.darkMid,
+                    flex: 1, lineHeight: 1.3, transition: "color 0.2s",
+                  }}>{e.title}</h2>
+                  <span style={{
+                    width: 28, height: 28, borderRadius: "50%",
+                    background: isOpen ? (isLast ? `${C.gold}20` : "rgba(192,57,43,0.1)") : C.creamMid,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                    transition: "all 0.2s",
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.25s" }}>
+                      <path d="M2 4.5L6 8L10 4.5" stroke={isOpen ? (isLast ? C.goldDark : e.color) : C.mid} strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </span>
+                </button>
+
+                {/* Contenu accordéon */}
+                <div style={{
+                  maxHeight: isOpen ? "600px" : "0",
+                  overflow: "hidden",
+                  transition: "max-height 0.4s cubic-bezier(0.23,1,0.32,1)",
+                }}>
+                  <div style={{ paddingBottom: "2rem", paddingLeft: "3.25rem" }}>
+                    <p style={{ fontFamily: body, fontSize: "1rem", color: C.darkMid, lineHeight: 1.75, fontWeight: 600, marginBottom: "0.75rem" }}>
+                      {e.intro}
+                    </p>
+                    <p style={{ fontFamily: body, fontSize: "0.93rem", color: C.mid, lineHeight: 1.75, marginBottom: "1.25rem" }}>
+                      {e.detail}
+                    </p>
+                    <div style={{
+                      background: isLast ? `${C.gold}08` : "rgba(192,57,43,0.05)",
+                      borderLeft: `2px solid ${isLast ? C.gold : e.color}`,
+                      padding: "0.9rem 1.25rem",
+                    }}>
+                      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: isLast ? C.goldDark : e.color, marginBottom: "0.6rem" }}>Conséquences</p>
+                      {e.consequences.map((c, j) => (
+                        <p key={j} style={{ fontFamily: body, fontSize: "0.9rem", color: C.darkMid, lineHeight: 1.6, marginBottom: j < e.consequences.length - 1 ? "0.3rem" : 0 }}>
+                          — {c}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </AnimDiv>
-          ))}
-        </div>
-        <CTABanner variant="dark" />
+          );
+        })}
       </div>
+
+      {/* CTA */}
+      <CTABanner variant="dark" setPage={setPage} />
     </div>
   );
 }
@@ -679,48 +917,260 @@ function MethodePage({ setPage }) {
 // ─── Page: Tarifs ─────────────────────────────────────────────────────────────
 
 function TarifsPage({ setPage }) {
-  const offers = [
-    { icon: Search, title: "Désordre spécifique", price: "150 – 400 €", desc: "Diagnostic ciblé : fissures, humidité, désordres ponctuels.", featured: false },
-    { icon: Eye, title: "Visite conseil complète", price: "800 €", desc: "Analyse globale du bâtiment, rapport détaillé, plan d'action prioritaire.", featured: true },
-    { icon: FileText, title: "Rapport d'expertise", price: "Sur devis", desc: "Document complet pour notaire, assurance, ou avant acquisition.", featured: false },
-    { icon: ClipboardCheck, title: "Suivi de restauration", price: "Sur devis", desc: "Accompagnement complet du chantier de restauration.", featured: false },
-    { icon: HardHat, title: "Assistance MOE", price: "Sur devis", desc: "Maîtrise d'œuvre pour grands projets patrimoniaux.", featured: false },
-    { icon: Home, title: "Audit avant achat", price: "500 – 900 €", desc: "Évaluation complète avant acquisition d'un bien ancien.", featured: false },
+  const essentialFeatures = [
+    "Diagnostic ciblé sur site",
+    "Rapport écrit détaillé",
+    "Plan d'action priorisé",
+    "Réponse sous 48h",
   ];
+  const expertFeatures = [
+    "Analyse globale du bâtiment",
+    "Rapport complet + préconisations",
+    "Suivi artisans disponible",
+    "Réponse en temps réel",
+    "Économies moyennes : 40 %",
+  ];
+  const autresServices = [
+    { icon: FileText, label: "Rapport pour notaire / assurance", price: "Sur devis" },
+    { icon: ClipboardCheck, label: "Suivi de chantier de restauration", price: "Sur devis" },
+    { icon: HardHat, label: "Assistance maîtrise d'œuvre", price: "Sur devis" },
+    { icon: Home, label: "Audit avant acquisition", price: "500 – 900 €" },
+  ];
+
+  const chateauFeatures = [
+    "Diagnostic structurel complet",
+    "Rapport patrimonial détaillé",
+    "Préconisations artisans spécialisés",
+    "Coordination des corps de métier",
+    "Suivi de chantier dédié",
+    "Optimisation budgétaire",
+    "Conformité monuments historiques",
+  ];
+
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle title="Tarifs & Prestations" subtitle="Des interventions adaptées à chaque situation, sans engagement inutile." />
-        <div className="resp-grid-3" style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.25rem", marginBottom:"4rem"}}>
-          {offers.map((o, i) => (
-            <AnimDiv key={i} delay={i * 80}>
-              <div style={{
-                background: o.featured ? C.dark : C.white,
-                border: o.featured ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
-                borderRadius: "0.75rem", padding: "2rem",
-                height: "100%",
-                boxShadow: o.featured ? `0 12px 40px ${C.gold}22` : "none",
-                position: "relative",
-              }}>
-                {o.featured && (
-                  <div style={{ position: "absolute", top: "-1px", right: "1.5rem", background: C.gold, color: C.white, fontSize: "0.72rem", fontFamily: body, fontWeight: 600, padding: "0.2rem 0.75rem", borderRadius: "0 0 0.5rem 0.5rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>Recommandé</div>
-                )}
-                <GoldIcon icon={o.icon} />
-                <h3 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 600, color: o.featured ? C.white : C.dark, margin: "1rem 0 0.25rem" }}>{o.title}</h3>
-                <p style={{ fontFamily: serif, fontSize: "1.4rem", fontWeight: 700, color: C.gold, marginBottom: "0.75rem" }}>{o.price}</p>
-                <p style={{ fontFamily: body, color: o.featured ? "rgba(255,255,255,0.7)" : C.mid, fontSize: "0.92rem", lineHeight: 1.65 }}>{o.desc}</p>
+    <div style={{ background: C.cream, paddingTop: "3.75rem" }}>
+
+      {/* Hero sobre */}
+      <section style={{ padding: "4.5rem 2rem 3.5rem", textAlign: "center" }}>
+        <AnimDiv direction="up">
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.goldDark, marginBottom: "0.9rem" }}>Tarifs & Prestations</p>
+          <h1 style={{ fontFamily: serif, fontSize: "clamp(1.9rem, 4vw, 2.75rem)", fontWeight: 700, color: C.dark, lineHeight: 1.2, marginBottom: "1rem" }}>
+            Des interventions claires,<br />sans engagement superflu.
+          </h1>
+          <p style={{ fontFamily: body, fontSize: "1rem", color: C.mid, maxWidth: "34rem", margin: "0 auto", lineHeight: 1.75 }}>
+            Chaque prestation est calibrée pour votre situation. Un expert payé au devis — jamais au pourcentage des travaux.
+          </p>
+        </AnimDiv>
+      </section>
+
+      {/* 2 cartes principales */}
+      <div style={{ maxWidth: "62rem", margin: "0 auto", padding: "0 2rem 4rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
+
+          {/* Carte Essentiel — claire */}
+          <AnimDiv delay={0}>
+            <div style={{
+              background: C.white,
+              border: `1px solid ${C.border}`,
+              borderRadius: "1.25rem",
+              overflow: "hidden",
+              height: "100%",
+              display: "flex", flexDirection: "column",
+            }}>
+              <div style={{ padding: "2rem 2rem 1.5rem", borderBottom: `1px solid ${C.border}` }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+                  <div>
+                    <h2 style={{ fontFamily: serif, fontSize: "1.6rem", fontWeight: 700, color: C.dark, marginBottom: "0.2rem" }}>Diagnostic ciblé</h2>
+                    <p style={{ fontFamily: body, fontSize: "0.875rem", color: C.mid }}>Un désordre spécifique à analyser.</p>
+                  </div>
+                  <span style={{ fontFamily: body, fontSize: "0.7rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: C.mid, background: C.creamMid, border: `1px solid ${C.border}`, padding: "0.2rem 0.6rem", borderRadius: "2rem" }}>Ponctuel</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.25rem", marginBottom: "1.5rem" }}>
+                  <span style={{ fontFamily: serif, fontSize: "2.8rem", fontWeight: 700, color: C.dark, letterSpacing: "-0.02em" }}>150</span>
+                  <span style={{ fontFamily: body, color: C.mid, fontSize: "1rem" }}>– 400 €</span>
+                </div>
+                <button
+                  onClick={() => setPage("contact")}
+                  style={{
+                    width: "100%", padding: "0.85rem", borderRadius: "0.6rem",
+                    background: C.dark, color: C.white,
+                    border: "none", cursor: "pointer",
+                    fontFamily: body, fontSize: "0.9rem", fontWeight: 600,
+                    transition: "opacity 0.18s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                >
+                  Prendre rendez-vous
+                </button>
               </div>
-            </AnimDiv>
-          ))}
+              <div style={{ padding: "1.5rem 2rem", flex: 1 }}>
+                {essentialFeatures.map((f, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: i < essentialFeatures.length - 1 ? "0.75rem" : 0 }}>
+                    <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.dark, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Check size={9} color="#fff" strokeWidth={2.5} />
+                    </div>
+                    <span style={{ fontFamily: body, fontSize: "0.88rem", color: C.darkMid }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AnimDiv>
+
+          {/* Carte Expert — sombre */}
+          <AnimDiv delay={80}>
+            <div style={{
+              background: C.dark,
+              border: `2px solid ${C.gold}60`,
+              borderRadius: "1.25rem",
+              overflow: "hidden",
+              height: "100%",
+              display: "flex", flexDirection: "column",
+              boxShadow: `0 16px 50px ${C.gold}18`,
+              position: "relative",
+            }}>
+              {/* Badge */}
+              <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", background: C.gold, color: C.white, fontSize: "0.65rem", fontFamily: body, fontWeight: 700, padding: "0.2rem 0.65rem", borderRadius: "2rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Recommandé</div>
+
+              <div style={{ padding: "2rem 2rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                <div style={{ marginBottom: "1.25rem" }}>
+                  <h2 style={{ fontFamily: serif, fontSize: "1.6rem", fontWeight: 700, color: C.white, marginBottom: "0.2rem" }}>Visite conseil</h2>
+                  <p style={{ fontFamily: body, fontSize: "0.875rem", color: "rgba(255,255,255,0.5)" }}>Analyse globale du bâtiment.</p>
+                </div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.25rem", marginBottom: "1.5rem" }}>
+                  <span style={{ fontFamily: serif, fontSize: "2.8rem", fontWeight: 700, color: C.white, letterSpacing: "-0.02em" }}>800</span>
+                  <span style={{ fontFamily: body, color: "rgba(255,255,255,0.45)", fontSize: "1rem" }}>€ fixe</span>
+                </div>
+                <button
+                  onClick={() => setPage("contact")}
+                  style={{
+                    width: "100%", padding: "0.85rem", borderRadius: "0.6rem",
+                    background: C.white, color: C.dark,
+                    border: "none", cursor: "pointer",
+                    fontFamily: body, fontSize: "0.9rem", fontWeight: 700,
+                    transition: "opacity 0.18s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                >
+                  Demander un devis
+                </button>
+              </div>
+              <div style={{ padding: "1.5rem 2rem", flex: 1 }}>
+                {expertFeatures.map((f, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: i < expertFeatures.length - 1 ? "0.75rem" : 0 }}>
+                    <div style={{ width: 16, height: 16, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Check size={9} color="rgba(255,255,255,0.8)" strokeWidth={2.5} />
+                    </div>
+                    <span style={{ fontFamily: body, fontSize: "0.88rem", color: "rgba(255,255,255,0.7)" }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AnimDiv>
         </div>
-        <AnimDiv>
-          <div style={{ background: C.creamMid, border: `1px solid ${C.border}`, borderRadius: "1rem", padding: "2rem 2.5rem", textAlign: "center", marginBottom: "3rem" }}>
-            <p style={{ fontFamily: serif, fontSize: "1.1rem", color: C.dark, marginBottom: "0.5rem" }}>Déplacement inclus dans un rayon de 100 km</p>
-            <p style={{ fontFamily: body, color: C.mid, fontSize: "0.95rem" }}>Déplacement possible partout en France selon les projets.</p>
+
+        {/* Carte Châteaux — pleine largeur */}
+        <AnimDiv delay={110}>
+          <div style={{
+            background: C.dark,
+            backgroundImage: `linear-gradient(135deg, rgba(42,37,31,0.97) 0%, rgba(61,54,46,0.97) 100%)`,
+            border: `1px solid ${C.gold}40`,
+            marginBottom: "3rem",
+            overflow: "hidden",
+            position: "relative",
+          }}>
+            {/* Orbe décorative */}
+            <div style={{ position: "absolute", top: "-4rem", right: "-4rem", width: "20rem", height: "20rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}18 0%, transparent 70%)`, pointerEvents: "none" }} />
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", position: "relative", zIndex: 1 }}>
+              {/* Gauche — description */}
+              <div style={{ padding: "2.5rem 2.5rem 2.5rem 2.5rem", borderRight: `1px solid ${C.gold}20` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                  <Landmark size={18} style={{ color: C.gold }} />
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold }}>Offre Prestige</span>
+                </div>
+                <h3 style={{ fontFamily: serif, fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1rem" }}>
+                  Rénovation de châteaux<br />& grandes demeures
+                </h3>
+                <p style={{ fontFamily: body, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.75, marginBottom: "1.75rem" }}>
+                  Un accompagnement complet et sur mesure pour les bâtiments d'exception — du diagnostic initial au suivi de chantier, en préservant l'authenticité et la valeur patrimoniale de votre bien.
+                </p>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "2rem" }}>
+                  <span style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 700, color: C.white }}>Sur devis</span>
+                  <span style={{ fontFamily: body, fontSize: "0.8rem", color: "rgba(255,255,255,0.35)" }}>— déplacement inclus</span>
+                </div>
+                <button
+                  onClick={() => setPage("contact")}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.85rem 1.75rem",
+                    background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
+                    border: "none", cursor: "pointer",
+                    fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.white,
+                    boxShadow: `0 6px 20px ${C.gold}35`,
+                    transition: "opacity 0.18s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                >
+                  <Mail size={14} /> Demander un devis
+                </button>
+              </div>
+
+              {/* Droite — features */}
+              <div style={{ padding: "2.5rem" }}>
+                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", marginBottom: "1.25rem" }}>Inclus dans la prestation</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+                  {chateauFeatures.map((f, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", border: `1px solid ${C.gold}50`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Check size={10} color={C.gold} strokeWidth={2.5} />
+                      </div>
+                      <span style={{ fontFamily: body, fontSize: "0.88rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.4 }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </AnimDiv>
-        <CTABanner variant="dark" />
+
+        {/* Autres prestations — liste sobre */}
+        <AnimDiv delay={120}>
+          <div style={{ marginBottom: "2.5rem" }}>
+            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: C.light, marginBottom: "1rem" }}>Autres prestations</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.75rem" }}>
+              {autresServices.map((s, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", gap: "1rem",
+                  background: C.white, border: `1px solid ${C.border}`,
+                  padding: "1rem 1.25rem",
+                }}>
+                  <s.icon size={16} style={{ color: C.goldDark, flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: body, fontSize: "0.875rem", color: C.darkMid, lineHeight: 1.4 }}>{s.label}</p>
+                  </div>
+                  <span style={{ fontFamily: body, fontSize: "0.8rem", fontWeight: 600, color: C.goldDark, whiteSpace: "nowrap" }}>{s.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </AnimDiv>
+
+        {/* Note déplacement */}
+        <AnimDiv delay={160}>
+          <div style={{ background: C.creamMid, borderLeft: `3px solid ${C.gold}`, padding: "1rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+            <MapPin size={16} style={{ color: C.goldDark, flexShrink: 0 }} />
+            <div>
+              <p style={{ fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.dark }}>Déplacement inclus dans un rayon de 100 km</p>
+              <p style={{ fontFamily: body, fontSize: "0.8rem", color: C.mid }}>Intervention possible partout en France selon les projets.</p>
+            </div>
+          </div>
+        </AnimDiv>
       </div>
+
+      <CTABanner variant="dark" setPage={setPage} />
     </div>
   );
 }
@@ -933,13 +1383,6 @@ function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const contactInfo = [
-    { icon: Phone, label: "Téléphone", value: "+33 6 77 45 44 38", action: () => window.open("tel:+33677454438") },
-    { icon: Mail, label: "Email", value: "optimaexpertise46@gmail.com", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
-    { icon: MessageCircle, label: "WhatsApp", value: "Discuter maintenant", action: () => window.open("https://wa.me/33677454438") },
-    { icon: MapPin, label: "Zone d'intervention", value: "Déplacement possible partout en France", action: null },
-  ];
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -948,120 +1391,144 @@ function ContactPage() {
     setSubmitted(true);
   };
 
-  const inputStyle = {
-    width: "100%", padding: "0.75rem 1rem", borderRadius: "0.5rem",
-    border: `1px solid ${C.border}`, background: C.white,
-    fontFamily: body, fontSize: "1rem", color: C.dark,
-    outline: "none", transition: "border-color 0.2s ease",
-    boxSizing: "border-box",
+  const inp = {
+    width: "100%", padding: "0.75rem 1rem",
+    border: `1px solid ${C.border}`, background: C.cream,
+    fontFamily: body, fontSize: "0.95rem", color: C.dark,
+    outline: "none", transition: "border-color 0.2s, background 0.2s",
+    boxSizing: "border-box", borderRadius: "0",
   };
 
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle title="Parlons de votre projet." subtitle="Un premier échange sans engagement pour évaluer vos besoins." />
+    <div style={{ background: C.cream, paddingTop: "3.75rem", minHeight: "100vh" }}>
+      {/* Deux colonnes */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", minHeight: "calc(100vh - 3.75rem)" }}>
 
-        <div className="resp-grid-contact" style={{display:"grid", gridTemplateColumns:"2fr 3fr", gap:"2rem", marginBottom:"4rem"}}>
-          {/* Info */}
-          <div style={{ gridColumn: "span 2" }} className="space-y-4">
-            {contactInfo.map((c, i) => (
-              <AnimDiv key={i} delay={i * 80} direction="left">
+        {/* Colonne gauche — sombre, info */}
+        <div style={{ background: C.dark, padding: "5rem 3rem", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+          {/* Orbe */}
+          <div style={{ position: "absolute", bottom: "-6rem", left: "-6rem", width: "24rem", height: "24rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}14 0%, transparent 70%)`, pointerEvents: "none" }} />
+
+          <AnimDiv direction="left">
+            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold, marginBottom: "1.5rem" }}>Contact</p>
+            <h1 style={{ fontFamily: serif, fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1rem" }}>
+              Parlons de votre projet.
+            </h1>
+            <p style={{ fontFamily: body, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.75, marginBottom: "3rem" }}>
+              Un premier échange sans engagement pour évaluer vos besoins et définir la meilleure approche.
+            </p>
+
+            {/* Coordonnées */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {[
+                { icon: Phone, label: "Téléphone", value: "+33 6 77 45 44 38", action: () => window.open("tel:+33677454438") },
+                { icon: Mail, label: "Email", value: "optimaexpertise46@gmail.com", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
+                { icon: MessageCircle, label: "WhatsApp", value: "Discuter maintenant", action: () => window.open("https://wa.me/33677454438") },
+                { icon: MapPin, label: "Zone d'intervention", value: "Partout en France", action: null },
+              ].map((c, i) => (
                 <div
+                  key={i}
                   onClick={c.action}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "1rem",
-                    padding: "1.25rem", borderRadius: "0.75rem",
-                    border: `1px solid ${C.border}`, background: C.white,
-                    cursor: c.action ? "pointer" : "default",
-                    transition: "box-shadow 0.2s ease",
-                  }}
-                  onMouseEnter={e => { if (c.action) e.currentTarget.style.boxShadow = "0 6px 20px rgba(61,54,46,0.1)"; }}
-                  onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
+                  style={{ display: "flex", alignItems: "center", gap: "1rem", cursor: c.action ? "pointer" : "default" }}
                 >
-                  <div style={{ width: 44, height: 44, borderRadius: "0.6rem", background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <c.icon size={18} style={{ color: C.goldDark }} />
+                  <div style={{ width: 36, height: 36, borderRadius: "0.35rem", background: `${C.gold}18`, border: `1px solid ${C.gold}25`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <c.icon size={15} style={{ color: C.gold }} />
                   </div>
                   <div>
-                    <p style={{ fontFamily: body, fontSize: "0.75rem", color: C.light, textTransform: "uppercase", letterSpacing: "0.1em" }}>{c.label}</p>
-                    <p style={{ fontFamily: body, fontSize: "0.95rem", fontWeight: 600, color: C.dark }}>{c.value}</p>
+                    <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.58rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", marginBottom: "0.1rem" }}>{c.label}</p>
+                    <p style={{ fontFamily: body, fontSize: "0.875rem", color: c.action ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.55)", fontWeight: c.action ? 500 : 400 }}>{c.value}</p>
                   </div>
                 </div>
-              </AnimDiv>
-            ))}
-          </div>
-
-          {/* Form */}
-          <AnimDiv style={{ gridColumn: "span 3" }} className="md:col-span-3">
-            <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "1rem", padding: "2.5rem" }}>
-              {submitted ? (
-                <div style={{ textAlign: "center", padding: "2rem 0" }}>
-                  <CheckCircle size={52} style={{ color: "#22c55e", margin: "0 auto 1.25rem" }} />
-                  <h3 style={{ fontFamily: serif, fontSize: "1.4rem", color: C.dark, marginBottom: "0.75rem" }}>Message envoyé !</h3>
-                  <p style={{ fontFamily: body, color: C.mid, fontSize: "1rem" }}>Laurent vous contactera dans les 24h pour discuter de votre projet.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit}>
-                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label style={{ display: "block", fontFamily: body, fontSize: "0.85rem", color: C.mid, marginBottom: "0.4rem" }}>Nom *</label>
-                      <input required style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Jean Dupont"
-                        onFocus={e => e.target.style.borderColor = C.gold}
-                        onBlur={e => e.target.style.borderColor = C.border}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontFamily: body, fontSize: "0.85rem", color: C.mid, marginBottom: "0.4rem" }}>Email *</label>
-                      <input required type="email" style={inputStyle} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="jean@exemple.fr"
-                        onFocus={e => e.target.style.borderColor = C.gold}
-                        onBlur={e => e.target.style.borderColor = C.border}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label style={{ display: "block", fontFamily: body, fontSize: "0.85rem", color: C.mid, marginBottom: "0.4rem" }}>Téléphone</label>
-                      <input style={inputStyle} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+33 6 77 45 44 38"
-                        onFocus={e => e.target.style.borderColor = C.gold}
-                        onBlur={e => e.target.style.borderColor = C.border}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontFamily: body, fontSize: "0.85rem", color: C.mid, marginBottom: "0.4rem" }}>Type de projet</label>
-                      <select style={{ ...inputStyle }} value={form.project_type} onChange={e => setForm({ ...form, project_type: e.target.value })}
-                        onFocus={e => e.target.style.borderColor = C.gold}
-                        onBlur={e => e.target.style.borderColor = C.border}
-                      >
-                        <option value="">Choisir…</option>
-                        <option value="maison_ancienne">Maison ancienne</option>
-                        <option value="chateau">Château</option>
-                        <option value="moulin">Moulin</option>
-                        <option value="manoir">Manoir</option>
-                        <option value="autre">Autre</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: "1.5rem" }}>
-                    <label style={{ display: "block", fontFamily: body, fontSize: "0.85rem", color: C.mid, marginBottom: "0.4rem" }}>Message *</label>
-                    <textarea required rows={5} style={{ ...inputStyle, resize: "vertical" }} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Décrivez votre projet, vos questions…"
-                      onFocus={e => e.target.style.borderColor = C.gold}
-                      onBlur={e => e.target.style.borderColor = C.border}
-                    />
-                  </div>
-                  <button type="submit" disabled={loading} style={{
-                    width: "100%", padding: "0.9rem", borderRadius: "0.6rem", border: "none", cursor: "pointer",
-                    background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
-                    color: C.white, fontFamily: body, fontSize: "1rem", fontWeight: 600,
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                    opacity: loading ? 0.7 : 1, transition: "opacity 0.2s ease",
-                    boxShadow: `0 6px 20px ${C.gold}44`,
-                  }}>
-                    <Send size={16} />
-                    {loading ? "Envoi en cours…" : "Envoyer le message"}
-                  </button>
-                </form>
-              )}
+              ))}
             </div>
           </AnimDiv>
+        </div>
+
+        {/* Colonne droite — formulaire */}
+        <div style={{ padding: "5rem 3.5rem", display: "flex", alignItems: "center", background: C.white }}>
+          <div style={{ width: "100%", maxWidth: "480px", margin: "0 auto" }}>
+            <AnimDiv direction="right">
+              {submitted ? (
+                <div style={{ textAlign: "center", padding: "3rem 0" }}>
+                  <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(34,197,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+                    <CheckCircle size={32} style={{ color: "#22c55e" }} />
+                  </div>
+                  <h3 style={{ fontFamily: serif, fontSize: "1.6rem", color: C.dark, marginBottom: "0.75rem" }}>Message envoyé !</h3>
+                  <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.7 }}>Laurent vous contactera dans les 24h pour discuter de votre projet.</p>
+                </div>
+              ) : (
+                <>
+                  <h2 style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 700, color: C.dark, marginBottom: "0.4rem" }}>Votre message</h2>
+                  <p style={{ fontFamily: body, fontSize: "0.875rem", color: C.mid, marginBottom: "2rem" }}>Remplissez le formulaire, nous répondons sous 24h.</p>
+
+                  <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                      <div>
+                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Nom *</label>
+                        <input required style={inp} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Jean Dupont"
+                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
+                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Email *</label>
+                        <input required type="email" style={inp} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="jean@exemple.fr"
+                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
+                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                      <div>
+                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Téléphone</label>
+                        <input style={inp} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+33 6 77 45 44 38"
+                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
+                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Type de projet</label>
+                        <select style={{ ...inp, appearance: "none" }} value={form.project_type} onChange={e => setForm({ ...form, project_type: e.target.value })}
+                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
+                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
+                        >
+                          <option value="">Choisir…</option>
+                          <option value="maison_ancienne">Maison ancienne</option>
+                          <option value="chateau">Château</option>
+                          <option value="moulin">Moulin</option>
+                          <option value="manoir">Manoir</option>
+                          <option value="autre">Autre</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Message *</label>
+                      <textarea required rows={5} style={{ ...inp, resize: "vertical" }} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Décrivez votre projet, vos questions…"
+                        onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
+                        onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
+                      />
+                    </div>
+
+                    <button type="submit" disabled={loading} style={{
+                      padding: "0.9rem 1.5rem", border: "none", cursor: "pointer",
+                      background: C.dark, color: C.white,
+                      fontFamily: body, fontSize: "0.9rem", fontWeight: 600,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                      opacity: loading ? 0.7 : 1, transition: "opacity 0.18s",
+                    }}
+                      onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.85"; }}
+                      onMouseLeave={e => e.currentTarget.style.opacity = loading ? "0.7" : "1"}
+                    >
+                      <Send size={14} />
+                      {loading ? "Envoi en cours…" : "Envoyer le message"}
+                    </button>
+                  </form>
+                </>
+              )}
+            </AnimDiv>
+          </div>
         </div>
       </div>
     </div>

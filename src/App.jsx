@@ -749,10 +749,10 @@ function ErreursPage({ setPage }) {
         <div style={{ maxWidth: "56rem", margin: "0 auto", position: "relative", zIndex: 1 }}>
           <AnimDiv direction="up">
             <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold, marginBottom: "1.25rem" }}>
-              Les 4 erreurs majeures du bâti ancien
+              Les 4 erreurs qui coûtent cher dans la restauration du bâti ancien
             </p>
             <h1 style={{ fontFamily: serif, fontSize: "clamp(2rem, 5vw, 3.25rem)", fontWeight: 700, color: C.white, lineHeight: 1.15, marginBottom: "1.5rem", maxWidth: "44rem" }}>
-              Ce qui coûte le plus cher,<br />c'est ce qui semblait logique.
+              Ce qui coûte le plus cher,<br />c'est pourtant ce qui semblait souvent logique.
             </h1>
             <p style={{ fontFamily: body, fontSize: "1.05rem", color: "rgba(255,255,255,0.6)", maxWidth: "38rem", lineHeight: 1.75 }}>
               En bâti ancien, les interventions modernes sont souvent inadaptées. Chacune de ces erreurs peut coûter des dizaines de milliers d'euros — parfois sans retour possible.
@@ -1083,12 +1083,12 @@ function TarifsPage({ setPage }) {
             {/* Orbe décorative */}
             <div style={{ position: "absolute", top: "-4rem", right: "-4rem", width: "20rem", height: "20rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}18 0%, transparent 70%)`, pointerEvents: "none" }} />
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", position: "relative", zIndex: 1 }}>
+            <div className="resp-grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", position: "relative", zIndex: 1 }}>
               {/* Gauche — description */}
               <div style={{ padding: "2.5rem 2.5rem 2.5rem 2.5rem", borderRight: `1px solid ${C.gold}20` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
                   <Landmark size={18} style={{ color: C.gold }} />
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold }}>Offre Prestige</span>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold }}>Offre grands édifices</span>
                 </div>
                 <h3 style={{ fontFamily: serif, fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1rem" }}>
                   Rénovation de châteaux<br />& grandes demeures
@@ -1163,7 +1163,7 @@ function TarifsPage({ setPage }) {
           <div style={{ background: C.creamMid, borderLeft: `3px solid ${C.gold}`, padding: "1rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
             <MapPin size={16} style={{ color: C.goldDark, flexShrink: 0 }} />
             <div>
-              <p style={{ fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.dark }}>Déplacement inclus dans un rayon de 100 km</p>
+              <p style={{ fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.dark }}>Déplacement inclus dans un rayon de 40 km</p>
               <p style={{ fontFamily: body, fontSize: "0.8rem", color: C.mid }}>Intervention possible partout en France selon les projets.</p>
             </div>
           </div>
@@ -1242,10 +1242,10 @@ function ChateauxPage({ setPage }) {
 
 function ProjetsPage({ setPage }) {
   const projects = [
+    { title: "Maisons paysannes de France", desc: "Président de l'association Maisons Paysannes de France en Corrèze, préservation du patrimoine rural.", image: IMG_PROJET },
     { title: "Chantiers participatifs", desc: "Accompagnement et formation de propriétaires sur des chantiers concrets de restauration.", image: IMG_PROJET },
     { title: "Village de Clédat", desc: "Restauration d'un village abandonné en Corrèze, patrimoine remarquable en milieu forestier.", image: IMG_PROJET },
     { title: "Projet béton romain", desc: "Recherche et expérimentation autour des mortiers anciens et du béton romain.", image: IMG_PROJET },
-    { title: "Maisons paysannes de Corrèze", desc: "Président de l'association Maisons Paysannes de France en Corrèze, préservation du patrimoine rural.", image: IMG_PROJET },
     { title: "Formations artisans", desc: "Programmes de formation pour artisans souhaitant se spécialiser dans la restauration du bâti ancien.", image: IMG_PROJET },
     { title: "Châteaux en Périgord", desc: "Diagnostics et plans de restauration pour plusieurs demeures historiques en Dordogne.", image: IMG_PROJET },
   ];
@@ -1365,7 +1365,7 @@ function AProposPage({ setPage }) {
             <div style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "1.75rem" }}>
               <Quote size={30} style={{ color: C.gold, marginBottom: "0.75rem" }} />
               <blockquote style={{ fontFamily: serif, fontSize: "clamp(1.1rem, 2vw, 1.35rem)", color: C.dark, fontStyle: "italic", lineHeight: 1.6 }}>
-                "Faire vite, bien, simple et durable."
+                "Faire bien, bon, beau, simple et durable."
               </blockquote>
             </div>
           </AnimDiv>
@@ -1402,7 +1402,7 @@ function ContactPage() {
   return (
     <div style={{ background: C.cream, paddingTop: "3.75rem", minHeight: "100vh" }}>
       {/* Deux colonnes */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", minHeight: "calc(100vh - 3.75rem)" }}>
+      <div className="resp-grid-contact" style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", minHeight: "calc(100vh - 3.75rem)" }}>
 
         {/* Colonne gauche — sombre, info */}
         <div style={{ background: C.dark, padding: "5rem 3rem", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", overflow: "hidden" }}>

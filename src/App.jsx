@@ -293,23 +293,10 @@ function HeroSection({ setPage }) {
 
             <GoldOrnament light />
 
-            <p style={{ fontFamily: body, fontSize: "clamp(0.95rem, 1.8vw, 1.1rem)", color: "rgba(247,244,239,0.7)", lineHeight: 1.85, marginBottom: "0.4rem", fontWeight: 300 }}>
-              Préservez votre patrimoine et optimisez votre budget.{" "}
-              <button onClick={() => setPopup(true)} aria-label="Comprendre comment économiser 40%" style={{ background: "none", border: "none", cursor: "pointer", color: C.goldLight, fontFamily: body, fontSize: "inherit", fontWeight: 400, textDecoration: "underline", textUnderlineOffset: "3px", padding: 0 }}>Comment ?*</button>
-            </p>
-            <p style={{ fontFamily: body, fontSize: "0.8rem", color: "rgba(247,244,239,0.35)", marginBottom: "2.5rem", fontStyle: "italic" }}>
-              ✦ Économies constatées de 20 à 40 % grâce à un diagnostic préalable.
-            </p>
-            <p style={{ fontFamily: body, fontSize: "0.875rem", color: "rgba(247,244,239,0.5)", marginBottom: "2.5rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <span style={{ color: C.gold, fontSize: "0.6rem" }}>◆</span>
-              30 ans d'expérience pour maisons anciennes, châteaux et moulins.
-            </p>
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.5rem" }}>
               {[
-                { icon: Phone,         label: "Appeler maintenant",  action: () => window.open("tel:+33677454438"),              primary: true,  aria: "Appeler Laurent de Boislorey" },
-                { icon: Mail,          label: "Demander un devis",   action: () => setPage && setPage("contact"),                 primary: false, aria: "Envoyer un e-mail pour un devis" },
-                { icon: MessageCircle, label: "WhatsApp",            action: () => window.open("https://wa.me/33677454438"),      primary: false, aria: "Contacter par WhatsApp" },
+                { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438"),   primary: true,  aria: "Appeler Laurent de Boislorey" },
+                { icon: Mail,  label: "Demander un devis",  action: () => setPage && setPage("contact"),     primary: false, aria: "Envoyer un e-mail pour un devis" },
               ].map((b, i) => (
                 <button key={i} onClick={b.action} aria-label={b.aria} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.85rem 1.75rem", background: b.primary ? C.gold : "transparent", border: `1px solid ${b.primary ? C.gold : "rgba(247,244,239,0.25)"}`, cursor: "pointer", fontFamily: body, fontSize: "0.875rem", fontWeight: 500, color: C.white, transition: "opacity 0.2s" }}
                   onMouseEnter={e => e.currentTarget.style.opacity = "0.78"}
@@ -441,11 +428,16 @@ function ServicesHomeSection({ setPage }) {
   return (
     <section style={{ padding: "7rem 2rem", background: C.bg }}>
       <div style={{ maxWidth: "70rem", margin: "0 auto" }}>
-        <Reveal style={{ textAlign: "center", marginBottom: "4rem" }}>
-          <Tag>Nos prestations</Tag>
-          <h2 style={{ fontFamily: serif, fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 600, color: C.dark, lineHeight: 1.15, marginBottom: "0" }}>Un accompagnement sur mesure.</h2>
-          <GoldOrnament />
-        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "5rem", alignItems: "start" }} className="split-grid">
+          <Reveal>
+            <Tag>Nos prestations</Tag>
+            <h2 style={{ fontFamily: serif, fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 600, color: C.dark, lineHeight: 1.15, marginBottom: "1rem" }}>Un accompagnement sur mesure.</h2>
+            <GoldOrnament />
+            <p style={{ fontFamily: body, color: C.stone, fontSize: "0.9rem", lineHeight: 1.85 }}>
+              Diagnostic, conseil et suivi de chantier pour les maisons anciennes, châteaux et moulins.
+            </p>
+          </Reveal>
+          <div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "0" }} className="three-col">
           {svcs.map((s, i) => (
             <Reveal key={i} delay={i * 90}>
@@ -465,6 +457,8 @@ function ServicesHomeSection({ setPage }) {
             </Reveal>
           ))}
         </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -480,7 +474,7 @@ function ProcessSection() {
   ];
   return (
     <PhotoSection
-      url="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80&fit=crop"
+      url="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80&fit=crop"
       alt="Château français en cours de restauration patrimoniale"
       overlay="rgba(26,22,18,0.85)"
       padding="7rem 2rem"
@@ -776,7 +770,7 @@ function ServicesPage({ setPage }) {
 
       {/* Hero Services — fond photo */}
       <PhotoSection
-        url="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80&fit=crop"
+        url="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80&fit=crop"
         alt="Château et grande demeure en cours de restauration patrimoniale"
         overlay="rgba(26,22,18,0.82)"
         padding="0"

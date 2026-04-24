@@ -5,480 +5,222 @@ const IMG_PROJET = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEB
 import { useState, useEffect, useRef } from "react";
 import {
   Phone, Mail, MessageCircle, ChevronDown, X, AlertTriangle,
-  Check, Wind, Thermometer, Droplets, Sun, Quote, Shield, Ban,
+  Check, Wind, Thermometer, Droplets, Sun, Quote, Shield,
   Wallet, ListChecks, Search, ClipboardList, HardHat, Award,
   Users, Landmark, BookOpen, Hammer, Mic, Calendar, Eye,
   FileText, ClipboardCheck, Home, MapPin, Send, CheckCircle,
-  Menu, Star, Leaf, Layers
+  Menu, Star, Leaf, Layers, ChevronRight, ArrowRight, Clock
 } from "lucide-react";
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
+// ─── Design Tokens ────────────────────────────────────────────────────────────
+const C = {
+  bg:        "#F7F4EF",
+  surface:   "#EDE8E0",
+  dark:      "#1A1612",
+  stone:     "#7C6F5E",
+  gold:      "#9B7A3E",
+  goldLight: "#C4A166",
+  border:    "#D9D1C3",
+  white:     "#FDFAF7",
+  mid:       "#6B5E52",
+  darkMid:   "#3D342B",
+};
 
-function useInView(threshold = 0.15) {
+const serif = "'Cormorant Garamond', 'Georgia', serif";
+const body  = "'Jost', 'Helvetica Neue', sans-serif";
+const mono  = "'DM Mono', monospace";
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function useInView(threshold = 0.12) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
-      { threshold }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold]);
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
   return [ref, inView];
 }
 
-function AnimDiv({ children, delay = 0, direction = "up", className = "", style = {} }) {
-  const [ref, inView] = useInView(0.1);
-  const transforms = {
-    up: "translateY(24px)",
-    left: "translateX(-24px)",
-    right: "translateX(24px)",
-    none: "none",
-  };
+function Reveal({ children, delay = 0, style = {} }) {
+  const [ref, inView] = useInView();
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "none" : transforms[direction],
-        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
-        ...style,
-      }}
-    >
+    <div ref={ref} style={{
+      opacity: inView ? 1 : 0,
+      transform: inView ? "none" : "translateY(28px)",
+      transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
+      ...style,
+    }}>
       {children}
     </div>
   );
 }
 
-// ─── Design Tokens ────────────────────────────────────────────────────────────
-
-const C = {
-  gold: "#c4a35a",
-  goldDark: "#b8943d",
-  goldDeep: "#9a7a2e",
-  dark: "#2a251f",
-  darkMid: "#3d362e",
-  mid: "#5c5145",
-  light: "#78716c",
-  cream: "#faf9f7",
-  creamMid: "#f0ece6",
-  border: "#e2dcd2",
-  white: "#ffffff",
-};
-
-const serif = "'Playfair Display', 'Georgia', serif";
-const body = "'EB Garamond', 'Georgia', serif";
-
-// ─── Shared Components ────────────────────────────────────────────────────────
-
-function Divider({ align = "center" }) {
+function Tag({ children }) {
   return (
-    <div className={`flex items-center gap-3 my-4 ${align === "center" ? "justify-center" : ""}`}>
-      <div style={{ height: "1px", width: "3rem", background: `linear-gradient(to right, transparent, ${C.gold}99)` }} />
-      <div style={{ width: "6px", height: "6px", background: C.gold, borderRadius: "50%" }} />
-      <div style={{ height: "1px", width: "3rem", background: `linear-gradient(to left, transparent, ${C.gold}99)` }} />
-    </div>
+    <span style={{ fontFamily: mono, fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold, display: "inline-block", marginBottom: "1rem" }}>
+      {children}
+    </span>
   );
 }
 
-function SectionTitle({ title, subtitle, align = "center", light = false }) {
-  const [ref, inView] = useInView(0.1);
-  return (
-    <div
-      ref={ref}
-      className={`mb-12 ${align === "center" ? "text-center" : "text-left"}`}
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "none" : "translateY(20px)",
-        transition: "opacity 0.6s ease, transform 0.6s ease",
-      }}
-    >
-      <h2 style={{
-        fontFamily: serif,
-        fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)",
-        color: light ? C.white : C.dark,
-        fontWeight: 700,
-        lineHeight: 1.3,
-      }}>
-        {title}
-      </h2>
-      <Divider align={align} />
-      {subtitle && (
-        <p style={{
-          color: light ? "rgba(255,255,255,0.7)" : C.mid,
-          fontFamily: body,
-          fontSize: "1.1rem",
-          maxWidth: align === "center" ? "36rem" : "none",
-          margin: align === "center" ? "0 auto" : "0",
-          lineHeight: 1.7,
-        }}>
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function CTABanner({ variant = "default", setPage }) {
-  const [ref, inView] = useInView(0.1);
-  const isDark = variant === "dark";
-  const btns = [
-    { icon: Phone, label: "Appeler", action: () => window.open("tel:+33677454438"), primary: true },
-    { icon: Mail, label: "Demander un devis", action: () => setPage ? setPage("contact") : window.open("mailto:optimaexpertise46@gmail.com"), primary: true },
-    { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438"), primary: false },
-  ];
-  return (
-    <div
-      ref={ref}
-      style={{
-        background: isDark ? C.dark : C.creamMid,
-      backgroundImage: isDark ? `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.015' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")` : `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236b5a4e' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
-        borderTop: isDark ? "none" : `1px solid ${C.border}`,
-        borderBottom: isDark ? "none" : `1px solid ${C.border}`,
-        opacity: inView ? 1 : 0,
-        transform: inView ? "none" : "translateY(20px)",
-        transition: "opacity 0.6s ease, transform 0.6s ease",
-        padding: "3rem 2rem",
-        textAlign: "center",
-      }}
-    >
-      <h3 style={{ fontFamily: serif, fontSize: "clamp(1.35rem, 2.5vw, 1.8rem)", fontWeight: 600, marginBottom: "0.5rem", color: isDark ? C.white : C.dark }}>
-        Parlons de votre projet
-      </h3>
-      <p style={{ fontFamily: body, color: isDark ? "rgba(255,255,255,0.65)" : C.mid, marginBottom: "1.75rem", maxWidth: "26rem", margin: "0 auto 1.75rem", fontSize: "0.95rem", lineHeight: 1.7 }}>
-        Un premier échange gratuit et sans engagement pour évaluer vos besoins et définir la meilleure approche.
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", justifyContent: "center", alignItems: "center" }}>
-        {btns.map((btn, i) => (
-          <button
-            key={i}
-            onClick={btn.action}
-            style={{
-              display: "flex", alignItems: "center", gap: "0.5rem",
-              padding: "0.7rem 1.4rem",
-              borderRadius: "0.35rem",
-              fontFamily: body, fontSize: "0.9rem", fontWeight: 500,
-              cursor: "pointer", transition: "opacity 0.18s ease",
-              background: btn.primary
-                ? `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`
-                : isDark ? "rgba(255,255,255,0.08)" : "rgba(61,54,46,0.07)",
-              color: btn.primary ? C.white : isDark ? "rgba(255,255,255,0.7)" : C.mid,
-              border: btn.primary ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.15)" : C.border}`,
-              boxShadow: btn.primary ? `0 4px 14px ${C.gold}40` : "none",
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >
-            <btn.icon size={14} />
-            {btn.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function GoldIcon({ icon: Icon, size = "md" }) {
-  const s = size === "lg" ? 56 : 44;
-  const i = size === "lg" ? 28 : 20;
-  return (
-    <div style={{
-      width: s, height: s, borderRadius: "50%",
-      background: `${C.gold}18`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      flexShrink: 0,
-    }}>
-      <Icon size={i} style={{ color: C.goldDark }} />
-    </div>
-  );
+function GoldLine() {
+  return <div style={{ width: 40, height: 2, background: C.gold, marginBottom: "1.5rem" }} />;
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
-
-const navLinks = [
-  { label: "Accueil", page: "home" },
+const NAV_LINKS = [
+  { label: "Accueil",          page: "home" },
   { label: "Erreurs coûteuses", page: "erreurs" },
-  { label: "Méthode", page: "methode" },
-  { label: "Tarifs", page: "tarifs" },
-  { label: "Châteaux", page: "chateaux" },
-  { label: "Projets", page: "projets" },
-  { label: "Conférences", page: "conferences" },
-  { label: "À propos", page: "apropos" },
-  { label: "Contact", page: "contact" },
+  { label: "Méthode",          page: "methode" },
+  { label: "Tarifs",           page: "tarifs" },
+  { label: "Châteaux",         page: "chateaux" },
+  { label: "Projets",          page: "projets" },
+  { label: "Conférences",      page: "conferences" },
+  { label: "À propos",         page: "apropos" },
+  { label: "Contact",          page: "contact" },
 ];
+const PRIMARY   = ["erreurs","methode","tarifs","contact"];
+const SECONDARY = ["chateaux","projets","conferences","apropos"];
 
-// Desktop nav shows only primary links; secondary in a "•••" dropdown
-const primaryLinks = ["erreurs", "methode", "tarifs", "contact"];
-const secondaryLinks = ["chateaux", "projets", "conferences", "apropos"];
-
-function Navbar({ currentPage, setPage }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+function Navbar({ current, setPage }) {
+  const [menu, setMenu] = useState(false);
+  const [more, setMore] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isHome = currentPage === "home";
-  const isLight = !isHome || scrolled;
+  const isHome = current === "home";
+  const light  = !isHome || scrolled;
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handler);
-    return () => window.removeEventListener("scroll", handler);
+    const h = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", h);
+    return () => window.removeEventListener("scroll", h);
   }, []);
 
-  // close "more" dropdown on outside click
   useEffect(() => {
-    if (!moreOpen) return;
-    const close = () => setMoreOpen(false);
+    if (!more) return;
+    const close = () => setMore(false);
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
-  }, [moreOpen]);
+  }, [more]);
 
-  const textColor = isLight ? C.dark : C.white;
-  const mutedColor = isLight ? C.mid : "rgba(255,255,255,0.7)";
-  const activeColor = isLight ? C.goldDark : C.gold;
-  const activeBg = isLight ? `${C.gold}16` : "rgba(255,255,255,0.1)";
+  const fg   = light ? C.dark    : C.white;
+  const muted= light ? C.stone   : "rgba(255,255,255,0.65)";
+  const bg   = light ? "rgba(247,244,239,0.97)" : "transparent";
+  const bd   = light ? `1px solid ${C.border}` : "none";
+
+  const go = (page) => { setPage(page); setMenu(false); setMore(false); };
 
   return (
-    <header style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: isLight ? "rgba(255,252,249,0.97)" : "transparent",
-      borderBottom: isLight ? `1px solid ${C.border}` : "none",
-      backdropFilter: isLight ? "blur(14px)" : "none",
-      transition: "background 0.3s ease, border-color 0.3s ease",
-    }}>
-      <nav style={{ maxWidth: "80rem", margin: "0 auto", padding: "0 2rem", height: "3.75rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1.5rem" }}>
-
+    <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:200, background:bg, borderBottom:bd, backdropFilter:light?"blur(16px)":"none", transition:"background 0.35s, border-color 0.35s" }}>
+      <nav style={{ maxWidth:"82rem", margin:"0 auto", padding:"0 2rem", height:"3.75rem", display:"flex", alignItems:"center", justifyContent:"space-between", gap:"1.5rem" }}>
         {/* Logo */}
-        <button onClick={() => { setPage("home"); setMenuOpen(false); }} style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}>
-          <span style={{ fontFamily: serif, fontWeight: 700, fontSize: "1rem", color: textColor, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-            Laurent de Boislorey <span style={{ color: C.gold, margin: "0 0.15rem" }}>·</span> <span style={{ fontWeight: 400, letterSpacing: "0.08em", fontSize: "0.8rem", color: isLight ? C.goldDark : C.gold }}>OPTIMA</span>
+        <button onClick={() => go("home")} style={{ background:"none", border:"none", cursor:"pointer", flexShrink:0 }}>
+          <span style={{ fontFamily:serif, fontWeight:600, fontSize:"1rem", color:fg, letterSpacing:"0.02em", whiteSpace:"nowrap" }}>
+            Laurent de Boislorey
+            <span style={{ color:C.gold, margin:"0 0.3rem" }}>·</span>
+            <span style={{ fontFamily:mono, fontSize:"0.65rem", fontWeight:400, letterSpacing:"0.12em", color: light ? C.gold : C.goldLight }}>OPTIMA</span>
           </span>
         </button>
 
-        {/* Desktop — primary links */}
-        <div className="hidden lg:flex items-center" style={{ gap: "0.15rem", flex: 1, justifyContent: "center" }}>
-          {navLinks.filter(l => primaryLinks.includes(l.page)).map(link => {
-            const active = currentPage === link.page;
-            return (
-              <button
-                key={link.page}
-                onClick={() => setPage(link.page)}
-                style={{
-                  background: active ? activeBg : "none",
-                  border: "none", cursor: "pointer",
-                  padding: "0.45rem 0.9rem",
-                  borderRadius: "0.4rem",
-                  fontFamily: body, fontSize: "0.875rem", fontWeight: active ? 600 : 400,
-                  color: active ? activeColor : mutedColor,
-                  transition: "all 0.18s ease",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.color = textColor; e.currentTarget.style.background = activeBg; } }}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.color = mutedColor; e.currentTarget.style.background = "none"; } }}
-              >
-                {link.label}
-              </button>
-            );
-          })}
-
+        {/* Desktop links */}
+        <div style={{ display:"flex", alignItems:"center", gap:"0.1rem", flex:1, justifyContent:"center" }} className="hidden lg:flex">
+          {NAV_LINKS.filter(l => PRIMARY.includes(l.page)).map(l => (
+            <button key={l.page} onClick={() => go(l.page)} style={{ background:"none", border:"none", cursor:"pointer", padding:"0.45rem 0.8rem", fontFamily:body, fontSize:"0.82rem", fontWeight:current===l.page?500:400, color:current===l.page?C.gold:muted, letterSpacing:"0.01em", transition:"color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = C.gold}
+              onMouseLeave={e => e.currentTarget.style.color = current===l.page?C.gold:muted}
+            >{l.label}</button>
+          ))}
           {/* More dropdown */}
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={e => { e.stopPropagation(); setMoreOpen(o => !o); }}
-              style={{
-                background: secondaryLinks.includes(currentPage) ? activeBg : "none",
-                border: "none", cursor: "pointer",
-                padding: "0.45rem 0.75rem", borderRadius: "0.4rem",
-                fontFamily: body, fontSize: "0.875rem", fontWeight: 400,
-                color: secondaryLinks.includes(currentPage) ? activeColor : mutedColor,
-                display: "flex", alignItems: "center", gap: "0.35rem",
-                transition: "all 0.18s ease",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.color = textColor; }}
-              onMouseLeave={e => { e.currentTarget.style.color = secondaryLinks.includes(currentPage) ? activeColor : mutedColor; }}
-            >
-              Plus
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.6, transform: moreOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+          <div style={{ position:"relative" }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setMore(!more)} style={{ background:"none", border:"none", cursor:"pointer", padding:"0.45rem 0.8rem", fontFamily:body, fontSize:"0.82rem", fontWeight:400, color:muted, display:"flex", alignItems:"center", gap:"0.2rem" }}>
+              Plus <ChevronDown size={12} style={{ transform:more?"rotate(180deg)":"none", transition:"transform 0.2s" }} />
             </button>
-            {moreOpen && (
-              <div style={{
-                position: "absolute", top: "calc(100% + 0.5rem)", right: 0,
-                background: "rgba(255,252,249,0.98)", backdropFilter: "blur(12px)",
-                border: `1px solid ${C.border}`, borderRadius: "0.75rem",
-                padding: "0.4rem", minWidth: "160px",
-                boxShadow: "0 8px 32px rgba(61,54,46,0.12)",
-                zIndex: 200,
-              }}>
-                {navLinks.filter(l => secondaryLinks.includes(l.page)).map(link => (
-                  <button
-                    key={link.page}
-                    onClick={() => { setPage(link.page); setMoreOpen(false); }}
-                    style={{
-                      display: "block", width: "100%", textAlign: "left",
-                      padding: "0.55rem 0.9rem", borderRadius: "0.5rem",
-                      background: currentPage === link.page ? `${C.gold}16` : "none",
-                      border: "none", cursor: "pointer",
-                      fontFamily: body, fontSize: "0.875rem",
-                      color: currentPage === link.page ? C.goldDark : C.mid,
-                      transition: "all 0.15s",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = C.creamMid}
-                    onMouseLeave={e => e.currentTarget.style.background = currentPage === link.page ? `${C.gold}16` : "none"}
-                  >
-                    {link.label}
-                  </button>
+            {more && (
+              <div style={{ position:"absolute", top:"100%", left:0, background:C.white, border:`1px solid ${C.border}`, minWidth:"180px", zIndex:300, boxShadow:"0 8px 24px rgba(26,22,18,0.12)" }}>
+                {NAV_LINKS.filter(l => SECONDARY.includes(l.page)).map(l => (
+                  <button key={l.page} onClick={() => go(l.page)} style={{ display:"block", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.75rem 1.25rem", textAlign:"left", fontFamily:body, fontSize:"0.85rem", color:C.mid, transition:"background 0.15s, color 0.15s" }}
+                    onMouseEnter={e => { e.currentTarget.style.background=C.surface; e.currentTarget.style.color=C.dark; }}
+                    onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.color=C.mid; }}
+                  >{l.label}</button>
                 ))}
               </div>
             )}
           </div>
         </div>
 
-        {/* CTA — Appeler */}
-        <div className="hidden lg:flex items-center" style={{ gap: "0.75rem", flexShrink: 0 }}>
-          <button
-            onClick={() => setPage("contact")}
-            style={{
-              background: "none", border: `1px solid ${isLight ? C.border : "rgba(255,255,255,0.25)"}`,
-              cursor: "pointer", fontFamily: body, fontSize: "0.875rem", fontWeight: 500,
-              color: mutedColor, padding: "0.5rem 1rem", borderRadius: "0.4rem",
-              transition: "all 0.18s ease",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.color = C.goldDark; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = isLight ? C.border : "rgba(255,255,255,0.25)"; e.currentTarget.style.color = mutedColor; }}
-          >
-            Devis
-          </button>
-          <button
-            onClick={() => window.open("tel:+33677454438")}
-            style={{
-              background: C.dark, border: "none", cursor: "pointer",
-              fontFamily: body, fontSize: "0.875rem", fontWeight: 600,
-              color: C.white, padding: "0.5rem 1.1rem", borderRadius: "0.4rem",
-              display: "flex", alignItems: "center", gap: "0.5rem",
-              transition: "opacity 0.18s",
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >
-            <Phone size={13} /> Appeler
-          </button>
-        </div>
-
-        {/* Hamburger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden"
-          style={{ background: "none", border: "none", cursor: "pointer", color: textColor, padding: "0.5rem" }}
+        {/* CTA desktop */}
+        <button onClick={() => go("contact")} className="hidden lg:flex" style={{ display:"flex", alignItems:"center", gap:"0.4rem", background:C.gold, border:"none", cursor:"pointer", padding:"0.55rem 1.25rem", fontFamily:body, fontSize:"0.82rem", fontWeight:500, color:C.white, letterSpacing:"0.03em", transition:"opacity 0.2s", flexShrink:0 }}
+          onMouseEnter={e => e.currentTarget.style.opacity="0.85"}
+          onMouseLeave={e => e.currentTarget.style.opacity="1"}
         >
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          <Phone size={13} aria-hidden="true" /> Nous contacter
+        </button>
+
+        {/* Mobile burger */}
+        <button onClick={() => setMenu(!menu)} aria-label="Menu" className="lg:hidden" style={{ background:"none", border:"none", cursor:"pointer", color:fg, padding:"0.25rem" }}>
+          <Menu size={22} />
         </button>
       </nav>
 
       {/* Mobile menu */}
-      <div style={{
-        maxHeight: menuOpen ? "600px" : "0",
-        overflow: "hidden",
-        transition: "max-height 0.35s ease",
-        background: "rgba(255,252,249,0.98)",
-        borderBottom: menuOpen ? `1px solid ${C.border}` : "none",
-      }}>
-        <div style={{ padding: "1rem 1.5rem 1.5rem" }}>
-          {navLinks.map(link => (
-            <button
-              key={link.page}
-              onClick={() => { setPage(link.page); setMenuOpen(false); }}
-              style={{
-                display: "block", width: "100%", textAlign: "left",
-                padding: "0.65rem 1rem", borderRadius: "0.5rem",
-                background: currentPage === link.page ? `${C.gold}18` : "none",
-                border: "none", cursor: "pointer",
-                fontFamily: body, fontSize: "1rem",
-                color: currentPage === link.page ? C.goldDark : C.mid,
-                marginBottom: "0.15rem",
-              }}
-            >
-              {link.label}
-            </button>
+      {menu && (
+        <div style={{ background:C.white, borderTop:`1px solid ${C.border}`, padding:"1rem 2rem 2rem" }}>
+          {NAV_LINKS.map(l => (
+            <button key={l.page} onClick={() => go(l.page)} style={{ display:"block", background:"none", border:"none", cursor:"pointer", padding:"0.75rem 0", fontFamily:body, fontSize:"1rem", color:current===l.page?C.gold:C.dark, borderBottom:`1px solid ${C.border}`, width:"100%", textAlign:"left" }}>{l.label}</button>
           ))}
-          <button
-            onClick={() => window.open("tel:+33677454438")}
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%", background: C.dark, border: "none", cursor: "pointer", fontFamily: body, marginTop: "0.75rem", padding: "0.9rem 1.5rem", borderRadius: "0.4rem", fontSize: "1rem", fontWeight: 600, color: "#ffffff" }}
-          >
-            <Phone size={16} /> Appeler maintenant
-          </button>
         </div>
-      </div>
+      )}
     </header>
   );
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-
 function Footer({ setPage }) {
   return (
-    <footer style={{ background: C.dark, color: "rgba(255,255,255,0.65)", padding: "3.5rem 2rem" }}>
-      <div style={{ maxWidth: "72rem", margin: "0 auto" }}>
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
+    <footer style={{ background:C.dark, color:"rgba(247,244,239,0.55)", padding:"4rem 2rem 2rem" }}>
+      <div style={{ maxWidth:"72rem", margin:"0 auto" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"3rem", marginBottom:"3rem" }} className="resp-grid-3">
           <div>
-            <p style={{ fontFamily: serif, fontSize: "1.1rem", fontWeight: 700, color: C.white, marginBottom: "0.5rem" }}>Laurent de Boislorey</p>
-            <p style={{ fontFamily: body, fontSize: "0.95rem", lineHeight: 1.7 }}>
-              Expert indépendant du bâti ancien.<br />
-              30 ans d'expérience au service du patrimoine.
-            </p>
+            <p style={{ fontFamily:serif, fontSize:"1.15rem", fontWeight:600, color:C.white, marginBottom:"0.5rem" }}>Laurent de Boislorey</p>
+            <p style={{ fontFamily:body, fontSize:"0.9rem", lineHeight:1.75, marginBottom:"1rem" }}>Expert indépendant du bâti ancien. 30 ans au service du patrimoine.</p>
+            <a href="https://www.linkedin.com/in/laurent-de-boislorey" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ display:"inline-flex", alignItems:"center", gap:"0.4rem", color:"rgba(247,244,239,0.4)", textDecoration:"none", fontFamily:body, fontSize:"0.8rem", transition:"color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = C.white}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(247,244,239,0.4)"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn
+            </a>
           </div>
           <div>
-            <p style={{ color: C.white, fontFamily: body, fontWeight: 600, marginBottom: "0.75rem", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Navigation</p>
-            <div className="grid grid-cols-2 gap-1">
-              {navLinks.map(link => (
-                <button
-                  key={link.page}
-                  onClick={() => setPage(link.page)}
-                  style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: body, fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", padding: "0.2rem 0" }}
-                  onMouseEnter={e => e.currentTarget.style.color = C.white}
-                  onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
-                >
-                  {link.label}
-                </button>
+            <p style={{ fontFamily:mono, fontSize:"0.6rem", textTransform:"uppercase", letterSpacing:"0.14em", color:C.goldLight, marginBottom:"1rem" }}>Navigation</p>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.25rem 1rem" }}>
+              {NAV_LINKS.map(l => (
+                <button key={l.page} onClick={() => setPage(l.page)} style={{ background:"none", border:"none", cursor:"pointer", textAlign:"left", fontFamily:body, fontSize:"0.85rem", color:"rgba(247,244,239,0.5)", padding:"0.15rem 0", transition:"color 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.color=C.white}
+                  onMouseLeave={e => e.currentTarget.style.color="rgba(247,244,239,0.5)"}
+                >{l.label}</button>
               ))}
             </div>
           </div>
           <div>
-            <p style={{ color: C.white, fontFamily: body, fontWeight: 600, marginBottom: "0.75rem", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Contact</p>
-            <p style={{ fontFamily: body, fontSize: "0.95rem", marginBottom: "0.3rem" }}>+33 6 77 45 44 38</p>
-            <p style={{ fontFamily: body, fontSize: "0.95rem", marginBottom: "0.3rem" }}>optimaexpertise46@gmail.com</p>
-            <p style={{ fontFamily: body, fontSize: "0.95rem", marginTop: "0.75rem", color: `${C.gold}cc` }}>Déplacement possible partout en France selon les projets</p>
+            <p style={{ fontFamily:mono, fontSize:"0.6rem", textTransform:"uppercase", letterSpacing:"0.14em", color:C.goldLight, marginBottom:"1rem" }}>Contact</p>
+            <p style={{ fontFamily:body, fontSize:"0.9rem", marginBottom:"0.4rem" }}>+33 6 77 45 44 38</p>
+            <p style={{ fontFamily:body, fontSize:"0.9rem", marginBottom:"0.4rem" }}>optimaexpertise46@gmail.com</p>
+            <p style={{ fontFamily:body, fontSize:"0.85rem", marginTop:"0.75rem", color:`${C.goldLight}aa` }}>Déplacement possible partout en France selon les projets</p>
           </div>
         </div>
-        <div style={{ height: "1px", background: "rgba(255,255,255,0.1)", margin: "0 0 1.5rem" }} />
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
-          <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", fontFamily: body }}>
+        <div style={{ height:"1px", background:"rgba(247,244,239,0.08)", margin:"0 0 1.5rem" }} />
+        <div style={{ display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:"1rem" }}>
+          <p style={{ fontFamily:body, fontSize:"0.78rem", color:"rgba(247,244,239,0.3)" }}>
             © {new Date().getFullYear()} Laurent de Boislorey - Tous droits réservés.
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-            <a href="https://www.linkedin.com/in/laurent-de-boislorey" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Laurent de Boislorey" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.4rem", fontFamily: body, fontSize: "0.8rem", transition: "color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
-              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-              LinkedIn
-            </a>
-            <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "0.8rem" }}>|</span>
-            <button onClick={() => {}} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", fontFamily: body, fontSize: "0.8rem", padding: 0, transition: "color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
-              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
-            >
-              Mentions légales
-            </button>
-            <button onClick={() => {}} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", fontFamily: body, fontSize: "0.8rem", padding: 0, transition: "color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
-              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
-            >
-              Confidentialité
-            </button>
+          <div style={{ display:"flex", gap:"1.5rem" }}>
+            {["Mentions légales","Confidentialité"].map(l => (
+              <button key={l} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:body, fontSize:"0.78rem", color:"rgba(247,244,239,0.3)", padding:0, transition:"color 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.color="rgba(247,244,239,0.7)"}
+                onMouseLeave={e => e.currentTarget.style.color="rgba(247,244,239,0.3)"}
+              >{l}</button>
+            ))}
           </div>
         </div>
       </div>
@@ -486,178 +228,99 @@ function Footer({ setPage }) {
   );
 }
 
+// ─── CTA Banner ───────────────────────────────────────────────────────────────
+function CTABanner({ setPage, light = false }) {
+  const [ref, inView] = useInView();
+  const bg = light ? C.bg : C.dark;
+  const headColor = light ? C.dark : C.white;
+  const subColor  = light ? C.stone : "rgba(247,244,239,0.55)";
+  return (
+    <section ref={ref} style={{ background:bg, padding:"5rem 2rem", opacity:inView?1:0, transform:inView?"none":"translateY(20px)", transition:"opacity 0.7s, transform 0.7s" }}>
+      <div style={{ maxWidth:"48rem", margin:"0 auto", textAlign:"center" }}>
+        <Tag>Prenons contact</Tag>
+        <h2 style={{ fontFamily:serif, fontSize:"clamp(1.6rem, 3.5vw, 2.5rem)", fontWeight:600, color:headColor, lineHeight:1.2, marginBottom:"1rem" }}>Parlons de votre projet</h2>
+        <p style={{ fontFamily:body, color:subColor, fontSize:"1rem", lineHeight:1.75, marginBottom:"2.5rem", maxWidth:"32rem", margin:"0 auto 2.5rem" }}>Un premier échange gratuit et sans engagement pour évaluer vos besoins et définir la meilleure approche.</p>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:"0.75rem", justifyContent:"center" }}>
+          {[
+            { icon:Phone, label:"Appeler", action:() => window.open("tel:+33677454438") },
+            { icon:Mail, label:"Demander un devis", action:() => setPage&&setPage("contact") },
+            { icon:MessageCircle, label:"WhatsApp", action:() => window.open("https://wa.me/33677454438") },
+          ].map((b,i) => (
+            <button key={i} onClick={b.action} style={{ display:"flex", alignItems:"center", gap:"0.5rem", padding:"0.8rem 1.75rem", background:i===0?C.gold:"transparent", border:`1px solid ${i===0?C.gold:light?C.border:"rgba(147,244,239,0.2)"}`, cursor:"pointer", fontFamily:body, fontSize:"0.9rem", fontWeight:500, color:i===0?C.white:light?C.dark:C.white, transition:"opacity 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity="0.75"}
+              onMouseLeave={e => e.currentTarget.style.opacity="1"}
+            >
+              <b.icon size={15} aria-hidden="true" />{b.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Page: Home ───────────────────────────────────────────────────────────────
-
-const HERO_SLIDES = [
-  {
-    url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80&fit=crop",
-    alt: "Château français en pierre en cours de restauration — patrimoine bâti ancien",
-    label: "Châteaux & grandes demeures",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1600&q=80&fit=crop",
-    alt: "Maison ancienne en pierre typique du patrimoine rural français",
-    label: "Maisons paysannes en pierre",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1600&q=80&fit=crop",
-    alt: "Moulin ancien restauré avec soin dans le respect des matériaux d'origine",
-    label: "Moulins & bâtiments ruraux",
-  },
-];
-
 function HeroSection({ setPage }) {
-  const [visible, setVisible] = useState(false);
-  const [bounce, setBounce] = useState(false);
-  const [slideIdx, setSlideIdx] = useState(0);
-  const [popupOpen, setPopupOpen] = useState(false);
-
+  const [vis, setVis] = useState(false);
+  const [dot, setDot] = useState(false);
+  const [popup, setPopup] = useState(false);
   useEffect(() => {
-    setTimeout(() => setVisible(true), 100);
-    const iv = setInterval(() => setBounce(b => !b), 1000);
-    const si = setInterval(() => setSlideIdx(i => (i + 1) % HERO_SLIDES.length), 5000);
-    return () => { clearInterval(iv); clearInterval(si); };
+    setTimeout(() => setVis(true), 120);
+    const iv = setInterval(() => setDot(d => !d), 900);
+    return () => clearInterval(iv);
   }, []);
-
-  const heroButtons = [
-    { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438"), ariaLabel: "Appeler Laurent de Boislorey au +33 6 77 45 44 38" },
-    { icon: Mail, label: "Demander un devis", action: () => setPage ? setPage("contact") : window.open("mailto:optimaexpertise46@gmail.com"), ariaLabel: "Envoyer un e-mail pour demander un devis" },
-    { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438"), ariaLabel: "Contacter par WhatsApp" },
-  ];
 
   return (
     <>
-      {/* Popup explication 40 % */}
-      {popupOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Comment économiser jusqu'à 40 % sur votre restauration"
-          onClick={() => setPopupOpen(false)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: C.white, borderRadius: "1rem", padding: "2.5rem", maxWidth: "480px", width: "100%", position: "relative" }}
-          >
-            <button
-              onClick={() => setPopupOpen(false)}
-              aria-label="Fermer la popup"
-              style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", cursor: "pointer", color: C.mid, fontSize: "1.25rem", lineHeight: 1 }}
-            >✕</button>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.goldDark, marginBottom: "1rem" }}>Comment économiser jusqu'à 40 % ?</p>
-            <h3 style={{ fontFamily: serif, fontSize: "1.4rem", fontWeight: 700, color: C.dark, marginBottom: "1rem", lineHeight: 1.3 }}>Un diagnostic expert évite les erreurs coûteuses</h3>
-            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "1rem" }}>
-              En bâti ancien, les interventions inadaptées — ciment sur des murs en pierre, isolation intérieure qui bloque la respiration des murs, traitements d'humidité mal diagnostiqués — génèrent des surcoûts importants et des dégradations parfois irréversibles.
-            </p>
-            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "1.5rem" }}>
-              Un accompagnement expert dès le départ permet d'éviter ces erreurs, de prioriser les travaux utiles et d'économiser en moyenne <strong style={{ color: C.dark }}>20 à 40 % du budget travaux</strong> par rapport à une approche non spécialisée.
-            </p>
-            <button
-              onClick={() => { setPopupOpen(false); setPage && setPage("contact"); }}
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.8rem 1.75rem", background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", borderRadius: "0.35rem", fontFamily: body, fontSize: "0.95rem", fontWeight: 600, color: C.white, cursor: "pointer" }}
-            >
-              <Mail size={15} /> Demander un diagnostic
+      {popup && (
+        <div role="dialog" aria-modal="true" aria-label="Comment économiser 40%" onClick={() => setPopup(false)} style={{ position:"fixed", inset:0, background:"rgba(26,22,18,0.6)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:C.white, padding:"3rem", maxWidth:"480px", width:"100%", position:"relative" }}>
+            <button onClick={() => setPopup(false)} aria-label="Fermer" style={{ position:"absolute", top:"1.25rem", right:"1.25rem", background:"none", border:"none", cursor:"pointer", color:C.stone, fontSize:"1.1rem", lineHeight:1 }}>✕</button>
+            <Tag>Comment économiser jusqu'à 40 % ?</Tag>
+            <h3 style={{ fontFamily:serif, fontSize:"1.5rem", fontWeight:600, color:C.dark, marginBottom:"1rem", lineHeight:1.25 }}>Un diagnostic expert évite les erreurs coûteuses</h3>
+            <p style={{ fontFamily:body, color:C.stone, lineHeight:1.8, fontSize:"0.95rem", marginBottom:"1rem" }}>En bâti ancien, les interventions inadaptées - ciment sur murs en pierre, isolation intérieure bloquant la respiration des murs, traitements d'humidité mal diagnostiqués - génèrent des surcoûts importants et des dégradations parfois irréversibles.</p>
+            <p style={{ fontFamily:body, color:C.stone, lineHeight:1.8, fontSize:"0.95rem", marginBottom:"2rem" }}>Un accompagnement expert dès le départ permet d'éviter ces erreurs et d'économiser en moyenne <strong style={{ color:C.dark }}>20 à 40 % du budget travaux</strong> par rapport à une approche non spécialisée.</p>
+            <button onClick={() => { setPopup(false); setPage&&setPage("contact"); }} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", padding:"0.8rem 1.75rem", background:C.gold, border:"none", cursor:"pointer", fontFamily:body, fontSize:"0.9rem", fontWeight:500, color:C.white }}>
+              <Mail size={14} aria-hidden="true" /> Demander un diagnostic
             </button>
           </div>
         </div>
       )}
 
-      <section style={{ position: "relative", minHeight: "92vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
-        {/* Slider images */}
-        {HERO_SLIDES.map((slide, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute", inset: 0,
-              backgroundImage: `url(${slide.url})`,
-              backgroundSize: "cover", backgroundPosition: "center",
-              opacity: i === slideIdx ? 1 : 0,
-              transition: "opacity 1.2s ease",
-            }}
-            role="img"
-            aria-label={slide.alt}
-          />
-        ))}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(2,6,23,0.88) 0%, rgba(15,23,42,0.75) 60%, rgba(42,37,31,0.65) 100%)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 10% 30%, rgba(196,163,90,0.1) 0%, transparent 70%)" }} />
+      <section style={{ position:"relative", minHeight:"95vh", display:"flex", alignItems:"center", overflow:"hidden" }}>
+        <div style={{ position:"absolute", inset:0, backgroundImage:`url(${IMG_HERO})`, backgroundSize:"cover", backgroundPosition:"center top" }} role="img" aria-label="Château et bâtiment ancien en pierre - restauration du patrimoine" />
+        <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(26,22,18,0.92) 0%, rgba(26,22,18,0.75) 55%, rgba(26,22,18,0.4) 100%)" }} />
 
-        {/* Slide label */}
-        <div style={{ position: "absolute", bottom: "4rem", right: "2rem", zIndex: 10 }}>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.45)" }}>
-            {HERO_SLIDES[slideIdx].label}
-          </span>
-          <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.5rem", justifyContent: "flex-end" }}>
-            {HERO_SLIDES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setSlideIdx(i)}
-                aria-label={`Image ${i + 1} : ${HERO_SLIDES[i].label}`}
-                style={{ width: i === slideIdx ? 24 : 8, height: 8, borderRadius: 4, background: i === slideIdx ? C.gold : "rgba(255,255,255,0.3)", border: "none", cursor: "pointer", padding: 0, transition: "width 0.3s ease, background 0.3s ease" }}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div style={{ position: "relative", zIndex: 10, maxWidth: "72rem", margin: "0 auto", padding: "5rem 2rem" }}>
-          <div style={{
-            maxWidth: "48rem",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "none" : "translateY(30px)",
-            transition: "opacity 0.9s ease, transform 0.9s ease",
-          }}>
-            <div style={{ display: "inline-block", background: `${C.gold}22`, border: `1px solid ${C.gold}55`, borderRadius: "999px", padding: "0.35rem 1rem", marginBottom: "1.5rem" }}>
-              <span style={{ fontFamily: body, color: C.gold, fontSize: "0.85rem", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                30 ans d'expérience
-              </span>
-            </div>
-
-            <h1 style={{ fontFamily: serif, fontSize: "clamp(2.4rem, 5.5vw, 4rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1.5rem" }}>
-              Expert indépendant<br />
-              <span style={{ color: C.gold }}>du bâti ancien</span>
+        <div style={{ position:"relative", zIndex:10, maxWidth:"80rem", margin:"0 auto", padding:"6rem 2rem", width:"100%" }}>
+          <div style={{ maxWidth:"44rem", opacity:vis?1:0, transform:vis?"none":"translateY(32px)", transition:"opacity 1s ease, transform 1s ease" }}>
+            <Tag>Expert indépendant du bâti ancien</Tag>
+            <h1 style={{ fontFamily:serif, fontSize:"clamp(2.8rem, 6vw, 4.8rem)", fontWeight:500, color:C.white, lineHeight:1.1, marginBottom:"1.5rem", letterSpacing:"-0.01em" }}>
+              Restaurez avec<br />
+              <span style={{ color:C.goldLight, fontStyle:"italic" }}>méthode et expertise</span>
             </h1>
-
-            <p style={{ fontFamily: body, fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)", color: "rgba(255,255,255,0.92)", fontWeight: 300, marginBottom: "0.4rem" }}>
+            <GoldLine />
+            <p style={{ fontFamily:body, fontSize:"clamp(1rem, 2vw, 1.15rem)", color:"rgba(247,244,239,0.75)", lineHeight:1.8, marginBottom:"0.5rem", fontWeight:300 }}>
               Préservez votre patrimoine et optimisez votre budget.{" "}
-              <button
-                onClick={() => setPopupOpen(true)}
-                aria-label="Comprendre comment économiser jusqu'à 40 % sur vos travaux"
-                style={{ background: "none", border: "none", cursor: "pointer", color: C.gold, fontFamily: body, fontSize: "inherit", fontWeight: 500, textDecoration: "underline", textUnderlineOffset: "3px", padding: 0 }}
-              >
-                Comment ?*
-              </button>
+              <button onClick={() => setPopup(true)} aria-label="Comprendre comment économiser jusqu'à 40%" style={{ background:"none", border:"none", cursor:"pointer", color:C.goldLight, fontFamily:body, fontSize:"inherit", fontWeight:400, textDecoration:"underline", textUnderlineOffset:"3px", padding:0 }}>Comment ?*</button>
             </p>
-
-            <p style={{ fontFamily: body, fontSize: "0.95rem", color: "rgba(214,211,209,0.75)", marginBottom: "1.25rem", fontStyle: "italic" }}>
-              * Économies constatées de 20 à 40 % grâce à un diagnostic expert préalable.
+            <p style={{ fontFamily:body, fontSize:"0.85rem", color:"rgba(247,244,239,0.4)", marginBottom:"2.5rem", fontStyle:"italic" }}>
+              * Économies constatées de 20 à 40 % grâce à un diagnostic préalable.
             </p>
-
-            <p style={{ fontFamily: body, fontSize: "1.05rem", color: "rgba(214,211,209,0.85)", maxWidth: "36rem", marginBottom: "1rem", lineHeight: 1.7, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span style={{ color: C.gold }}>✦</span> 30 ans d'expérience à vos côtés pour les maisons anciennes, châteaux et moulins.
+            <p style={{ fontFamily:body, fontSize:"0.9rem", color:"rgba(247,244,239,0.55)", marginBottom:"2.5rem", display:"flex", alignItems:"center", gap:"0.5rem" }}>
+              <span style={{ color:C.gold, fontSize:"0.7rem" }}>◆</span>
+              30 ans d'expérience à vos côtés pour maisons anciennes, châteaux et moulins.
             </p>
-
-            <Divider align="left" />
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1.5rem" }}>
-              {heroButtons.map((btn, i) => (
-                <button
-                  key={i}
-                  onClick={btn.action}
-                  aria-label={btn.ariaLabel}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.85rem 1.75rem", borderRadius: "0.35rem",
-                    fontFamily: body, fontSize: "0.95rem", fontWeight: 600,
-                    cursor: "pointer", transition: "opacity 0.2s ease",
-                    background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
-                    color: C.white,
-                    border: `2px solid ${C.gold}`,
-                    boxShadow: `0 6px 20px ${C.gold}40`,
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            <div style={{ display:"flex", flexWrap:"wrap", gap:"0.75rem" }}>
+              {[
+                { icon:Phone, label:"Appeler maintenant", action:() => window.open("tel:+33677454438"), primary:true, aria:"Appeler Laurent de Boislorey" },
+                { icon:Mail, label:"Demander un devis", action:() => setPage&&setPage("contact"), primary:false, aria:"Envoyer un e-mail pour un devis" },
+                { icon:MessageCircle, label:"WhatsApp", action:() => window.open("https://wa.me/33677454438"), primary:false, aria:"Contacter par WhatsApp" },
+              ].map((b,i) => (
+                <button key={i} onClick={b.action} aria-label={b.aria} style={{ display:"flex", alignItems:"center", gap:"0.5rem", padding:"0.85rem 1.75rem", background:b.primary?C.gold:"transparent", border:`1px solid ${b.primary?C.gold:"rgba(247,244,239,0.3)"}`, cursor:"pointer", fontFamily:body, fontSize:"0.9rem", fontWeight:500, color:C.white, transition:"opacity 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.opacity="0.8"}
+                  onMouseLeave={e => e.currentTarget.style.opacity="1"}
                 >
-                  <btn.icon size={17} aria-hidden="true" />{btn.label}
+                  <b.icon size={15} aria-hidden="true" />{b.label}
                 </button>
               ))}
             </div>
@@ -665,13 +328,8 @@ function HeroSection({ setPage }) {
         </div>
 
         {/* Scroll indicator */}
-        <div style={{
-          position: "absolute", bottom: "2rem", left: "50%",
-          transform: `translateX(-50%) translateY(${bounce ? 0 : 8}px)`,
-          transition: "transform 0.9s ease",
-          color: "rgba(255,255,255,0.35)",
-        }}>
-          <ChevronDown size={24} aria-hidden="true" />
+        <div style={{ position:"absolute", bottom:"2rem", left:"50%", transform:`translateX(-50%) translateY(${dot?0:6}px)`, transition:"transform 0.9s ease", color:"rgba(247,244,239,0.3)" }}>
+          <ChevronDown size={22} aria-hidden="true" />
         </div>
       </section>
     </>
@@ -679,222 +337,151 @@ function HeroSection({ setPage }) {
 }
 
 function ProblemSection() {
-  const [openCard, setOpenCard] = useState(null);
-  const problems = [
-    {
-      icon: AlertTriangle,
-      title: "Confusion bâti ancien et bâti moderne",
-      short: "Les règles du neuf ne s'appliquent pas à l'ancien.",
-      detail: "Un bâtiment ancien fonctionne selon une logique de respirabilité et d'inertie. Appliquer les normes du bâti moderne — isolation synthétique, béton, membranes étanches — conduit à piéger l'humidité dans les murs et à dégrader la structure sur le long terme.",
-    },
-    {
-      icon: Hammer,
-      title: "Travaux inutiles ou excessifs",
-      short: "Des interventions mal ciblées qui gonflent la facture.",
-      detail: "Sans diagnostic préalable, les artisans traitent souvent les symptômes plutôt que les causes. On refait une façade sans traiter le pied de mur, on isole sans résoudre l'humidité, on remplace des éléments encore sains. Résultat : des dépenses inutiles et des travaux à refaire.",
-    },
-    {
-      icon: Layers,
-      title: "Utilisation de matériaux inadaptés",
-      short: "Le ciment, le plâtre synthétique et la laine de verre abîment l'ancien.",
-      detail: "Le bâti ancien exige des matériaux naturels et perspirants : chaux aérienne, enduits de terre, chanvre, pierre. L'emploi de matériaux modernes imperméables crée des désordres : condensation, sels, efflorescence, décollement des enduits et dégradation accélérée.",
-    },
-    {
-      icon: Droplets,
-      title: "Diagnostic d'humidité insuffisant",
-      short: "L'humidité mal diagnostiquée génère des erreurs coûteuses.",
-      detail: "Il existe plusieurs types d'humidité (remontées capillaires, condensation, infiltrations, humidité de construction) avec des traitements radicalement différents. Un mauvais diagnostic conduit à des traitements inefficaces, voire aggravants — parfois pour des dizaines de milliers d'euros.",
-    },
+  const [open, setOpen] = useState(null);
+  const items = [
+    { icon:Hammer,        n:"01", title:"Confusion bâti ancien et bâti moderne",      short:"Les règles du neuf ne s'appliquent pas à l'ancien.", detail:"Un bâtiment ancien fonctionne selon une logique de respirabilité et d'inertie. Appliquer les normes du bâti moderne conduit à piéger l'humidité dans les murs et à dégrader la structure sur le long terme." },
+    { icon:AlertTriangle, n:"02", title:"Travaux inutiles ou excessifs",               short:"Des interventions mal ciblées qui gonflent la facture.", detail:"Sans diagnostic préalable, on traite souvent les symptômes plutôt que les causes. On refait une façade sans traiter le pied de mur, on isole sans résoudre l'humidité. Résultat : des dépenses inutiles et des travaux à refaire." },
+    { icon:Layers,        n:"03", title:"Utilisation de matériaux inadaptés",          short:"Le ciment et le plâtre synthétique abiment l'ancien.", detail:"Le bâti ancien exige des matériaux naturels et perspirants : chaux aérienne, enduits de terre, chanvre, pierre. L'emploi de matériaux modernes imperméables crée des désordres graves et coûteux." },
+    { icon:Droplets,      n:"04", title:"Diagnostic d'humidité insuffisant",           short:"L'humidité mal diagnostiquée génère des erreurs coûteuses.", detail:"Il existe plusieurs types d'humidité avec des traitements radicalement différents. Un mauvais diagnostic conduit à des traitements inefficaces, voire aggravants." },
   ];
   return (
-    <section style={{ padding: "5rem 2rem", background: C.white }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
-        <SectionTitle
-          title="La restauration d'un bâti ancien exige une méthode adaptée."
-          subtitle="La majorité des surcoûts viennent d'erreurs de méthode :"
-        />
-        <div className="resp-grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "1rem", marginBottom: "3rem" }}>
-          {problems.map((p, i) => {
-            const isOpen = openCard === i;
-            return (
-              <AnimDiv key={i} delay={i * 100}>
-                <div
-                  style={{
-                    borderLeft: "3px solid #f87171",
-                    background: isOpen ? "rgba(254,242,242,0.8)" : "rgba(254,242,242,0.4)",
-                    border: "1px solid rgba(252,165,165,0.3)",
-                    borderLeftWidth: "3px",
-                    borderLeftColor: "#f87171",
-                    padding: "1.5rem",
-                    cursor: "pointer",
-                    transition: "background 0.25s ease",
-                  }}
-                  onClick={() => setOpenCard(isOpen ? null : i)}
-                  role="button"
-                  aria-expanded={isOpen}
-                  tabIndex={0}
-                  onKeyDown={e => e.key === "Enter" && setOpenCard(isOpen ? null : i)}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <p.icon size={20} style={{ color: "#f87171", flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: body, color: C.dark, fontSize: "1rem", fontWeight: 600, lineHeight: 1.4, marginBottom: "0.3rem" }}>{p.title}</p>
-                      <p style={{ fontFamily: body, color: C.mid, fontSize: "0.88rem", lineHeight: 1.55 }}>{p.short}</p>
-                      {isOpen && (
-                        <p style={{ fontFamily: body, color: C.darkMid, fontSize: "0.88rem", lineHeight: 1.7, marginTop: "0.75rem", borderTop: "1px solid rgba(252,165,165,0.3)", paddingTop: "0.75rem" }}>{p.detail}</p>
-                      )}
-                    </div>
-                    <span style={{ color: "#f87171", fontSize: "0.9rem", flexShrink: 0, marginTop: "2px" }}>{isOpen ? "▲" : "▼"}</span>
+    <section style={{ padding:"6rem 2rem", background:C.white }}>
+      <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 2fr", gap:"4rem", alignItems:"start" }} className="resp-grid-contact">
+          <Reveal>
+            <Tag>Les erreurs fréquentes</Tag>
+            <h2 style={{ fontFamily:serif, fontSize:"clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight:600, color:C.dark, lineHeight:1.2, marginBottom:"1rem" }}>
+              La restauration du bâti ancien exige une méthode adaptée.
+            </h2>
+            <GoldLine />
+            <p style={{ fontFamily:body, color:C.stone, fontSize:"0.95rem", lineHeight:1.8 }}>
+              La majorité des surcoûts viennent d'erreurs de méthode. Cliquez sur chaque point pour comprendre.
+            </p>
+          </Reveal>
+          <div style={{ display:"flex", flexDirection:"column", gap:"0" }}>
+            {items.map((it, i) => {
+              const isOpen = open === i;
+              return (
+                <Reveal key={i} delay={i * 80}>
+                  <div style={{ borderBottom:`1px solid ${C.border}`, borderTop: i===0?`1px solid ${C.border}`:"none" }}>
+                    <button
+                      onClick={() => setOpen(isOpen ? null : i)}
+                      aria-expanded={isOpen}
+                      style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"1.5rem 0", display:"flex", alignItems:"flex-start", gap:"1.25rem", textAlign:"left" }}
+                    >
+                      <span style={{ fontFamily:mono, fontSize:"0.58rem", color:C.goldLight, letterSpacing:"0.1em", flexShrink:0, paddingTop:"3px" }}>{it.n}</span>
+                      <div style={{ flex:1 }}>
+                        <p style={{ fontFamily:body, fontSize:"1rem", fontWeight:500, color:C.dark, marginBottom:"0.25rem" }}>{it.title}</p>
+                        <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.stone }}>{it.short}</p>
+                        {isOpen && <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.mid, lineHeight:1.75, marginTop:"0.75rem", paddingTop:"0.75rem", borderTop:`1px solid ${C.border}` }}>{it.detail}</p>}
+                      </div>
+                      <span style={{ color:C.gold, fontSize:"1rem", flexShrink:0, paddingTop:"2px" }}>{isOpen?"−":"+"}</span>
+                    </button>
                   </div>
-                </div>
-              </AnimDiv>
-            );
-          })}
+                </Reveal>
+              );
+            })}
+          </div>
         </div>
-        <AnimDiv>
-          <div style={{ background: C.dark, padding: "2.5rem 3rem", textAlign: "center" }}>
-            <Shield size={32} style={{ color: C.gold, margin: "0 auto 1rem" }} aria-hidden="true" />
-            <p style={{ fontFamily: serif, fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)", color: C.white, lineHeight: 1.6 }}>
+        <Reveal delay={200}>
+          <div style={{ marginTop:"3.5rem", background:C.dark, padding:"2.5rem 3rem", display:"flex", alignItems:"center", gap:"2rem" }} className="resp-grid-contact">
+            <Shield size={36} style={{ color:C.gold, flexShrink:0 }} aria-hidden="true" />
+            <p style={{ fontFamily:serif, fontSize:"clamp(1.1rem, 2vw, 1.35rem)", color:C.white, lineHeight:1.6 }}>
               Évitez les surcoûts et les dégradations grâce à{" "}
-              <span style={{ color: C.gold, fontWeight: 600 }}>un accompagnement spécialisé</span>.
+              <span style={{ color:C.goldLight }}>un accompagnement spécialisé</span>.
             </p>
           </div>
-        </AnimDiv>
+        </Reveal>
       </div>
     </section>
   );
 }
 
 function PromiseSection({ setPage }) {
-  const [activePop, setActivePop] = useState(null);
-  const principles = [
-    {
-      icon: Wind,
-      label: "Murs perspirants",
-      text: "Les murs anciens respirent naturellement, régulant humidité et température. Obstruer cette respirabilité génère condensation, moisissures et dégradations structurelles.",
-      page: "methode",
-    },
-    {
-      icon: Thermometer,
-      label: "Forte inertie thermique",
-      text: "La pierre, la terre crue et le bois massif accumulent la chaleur le jour et la restituent la nuit, assurant un confort thermique naturel sans système de chauffage complexe.",
-      page: "methode",
-    },
-    {
-      icon: Leaf,
-      label: "Matériaux naturels",
-      text: "Chaux, chanvre, terre crue, enduits à la chaux — ces matériaux sont compatibles avec la structure ancienne. Ils s'auto-régulent, sont durables et réparables à moindre coût.",
-      page: "methode",
-    },
+  const cols = [
+    { icon:Wind,        title:"Murs perspirants",       text:"Les murs anciens respirent naturellement, régulant humidité et température. Obstruer cette respirabilité génère condensation, moisissures et dégradations structurelles." },
+    { icon:Thermometer, title:"Forte inertie thermique", text:"La pierre, la terre crue et le bois massif accumulent la chaleur le jour et la restituent la nuit, assurant un confort thermique naturel sans chauffage complexe." },
+    { icon:Leaf,        title:"Matériaux naturels",      text:"Chaux, chanvre, terre crue, enduits traditionnels. Ces matériaux sont compatibles avec la structure ancienne : auto-régulants, durables et réparables à moindre coût." },
   ];
   return (
-    <section style={{ padding: "5rem 2rem", background: C.cream }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
-        <SectionTitle
-          title={<>La meilleure solution n'est pas la plus chère.<br /><span style={{ color: C.goldDark }}>C'est celle qui respecte le bâtiment.</span></>}
-          subtitle="Le bâti ancien fonctionne selon trois principes fondamentaux :"
-        />
-        <div className="resp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
-          {principles.map((item, i) => (
-            <AnimDiv key={i} delay={i * 100}>
-              <div
-                style={{ background: C.white, border: `1px solid ${C.border}`, padding: "2rem 1.5rem", textAlign: "center", transition: "box-shadow 0.3s ease", position: "relative" }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 10px 30px rgba(61,54,46,0.1)"}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
-              >
-                <div style={{ margin: "0 auto 1rem", width: 52, height: 52, borderRadius: "50%", background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <item.icon size={24} style={{ color: C.goldDark }} aria-hidden="true" />
+    <section style={{ padding:"6rem 2rem", background:C.bg }}>
+      <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+        <Reveal style={{ maxWidth:"42rem", marginBottom:"4rem" }}>
+          <Tag>Les principes fondamentaux</Tag>
+          <h2 style={{ fontFamily:serif, fontSize:"clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight:600, color:C.dark, lineHeight:1.2, marginBottom:"1rem" }}>
+            La meilleure solution n'est pas la plus chère.{" "}
+            <span style={{ color:C.gold, fontStyle:"italic" }}>C'est celle qui respecte le bâtiment.</span>
+          </h2>
+          <GoldLine />
+          <p style={{ fontFamily:body, color:C.stone, lineHeight:1.8 }}>Le bâti ancien fonctionne selon trois principes que la plupart des artisans ignorent.</p>
+        </Reveal>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0" }} className="resp-grid-3">
+          {cols.map((c, i) => (
+            <Reveal key={i} delay={i * 100}>
+              <div style={{ padding:"2.5rem", borderRight: i < 2 ? `1px solid ${C.border}` : "none", borderTop:`1px solid ${C.border}`, borderBottom:`1px solid ${C.border}`, background:C.white }}>
+                <div style={{ width:44, height:44, background:`${C.gold}14`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.25rem" }}>
+                  <c.icon size={20} style={{ color:C.gold }} aria-hidden="true" />
                 </div>
-                <p style={{ fontFamily: serif, color: C.dark, fontSize: "1.05rem", fontWeight: 600, marginBottom: "0.65rem" }}>{item.label}</p>
-                <p style={{ fontFamily: body, color: C.mid, fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1rem" }}>{item.text}</p>
-                <button
-                  onClick={() => setPage && setPage(item.page)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: C.goldDark, fontFamily: body, fontSize: "0.85rem", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: "3px", padding: 0 }}
-                  aria-label={`En savoir plus sur ${item.label}`}
-                >
-                  En savoir plus →
+                <h3 style={{ fontFamily:serif, fontSize:"1.2rem", fontWeight:600, color:C.dark, marginBottom:"0.75rem" }}>{c.title}</h3>
+                <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.stone, lineHeight:1.75, marginBottom:"1.25rem" }}>{c.text}</p>
+                <button onClick={() => setPage&&setPage("methode")} style={{ background:"none", border:"none", cursor:"pointer", color:C.gold, fontFamily:body, fontSize:"0.82rem", fontWeight:500, padding:0, display:"flex", alignItems:"center", gap:"0.3rem" }}>
+                  En savoir plus <ArrowRight size={12} aria-hidden="true" />
                 </button>
               </div>
-            </AnimDiv>
+            </Reveal>
           ))}
         </div>
-        <AnimDiv>
-          <div style={{ background: C.white, border: `1px solid ${C.border}`, padding: "2.5rem 3rem", textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-              <Check size={18} style={{ color: "#22c55e" }} aria-hidden="true" />
-              <span style={{ color: "#16a34a", fontFamily: body, fontWeight: 600, fontSize: "0.9rem" }}>La clé</span>
-            </div>
-            <p style={{ fontFamily: serif, fontSize: "clamp(1.05rem, 2vw, 1.3rem)", color: C.dark, maxWidth: "40rem", margin: "0 auto", lineHeight: 1.65 }}>
-              Lorsque ces principes sont compris, les travaux deviennent plus simples, plus durables et{" "}
-              <span style={{ color: C.goldDark, fontWeight: 600 }}>beaucoup moins coûteux</span>.
-            </p>
-          </div>
-        </AnimDiv>
       </div>
     </section>
   );
 }
 
 function ServicesSection({ setPage }) {
-  const services = [
-    {
-      icon: Search,
-      title: "Diagnostic et expertise",
-      desc: "Analyse complète de votre bâtiment sur site : structure, humidité, matériaux, pathologies. Livrable : rapport détaillé avec préconisations hiérarchisées et chiffrage indicatif.",
-      details: ["Visite sur site (1 à 2 jours)", "Rapport écrit illustré", "Préconisations techniques et budgétaires", "Réponse aux interrogations des artisans"],
-    },
-    {
-      icon: ClipboardList,
-      title: "Assistance à la maîtrise d'ouvrage",
-      desc: "Accompagnement tout au long du chantier : sélection des artisans compétents en bâti ancien, validation des devis, contrôle de l'avancement et réception des travaux.",
-      details: ["Consultation et sélection des artisans", "Analyse des devis et négociation", "Visites de chantier régulières", "Réception et levée des réserves"],
-    },
-    {
-      icon: Layers,
-      title: "Conseil matériaux et techniques",
-      desc: "Choix des matériaux adaptés au bâti ancien et aux contraintes patrimoniales : chaux, chanvre, enduits traditionnels, bois. Respect des règles des Architectes des Bâtiments de France si nécessaire.",
-      details: ["Sélection des matériaux compatibles", "Respect des règles patrimoniales", "Conseil sur les fournisseurs spécialisés", "Formation de vos artisans si besoin"],
-    },
+  const svcs = [
+    { icon:Search,        n:"01", title:"Diagnostic et expertise",        desc:"Analyse complète de votre bâtiment sur site : structure, humidité, matériaux, pathologies. Livrable : rapport détaillé avec préconisations hiérarchisées et chiffrage indicatif.", details:["Visite sur site (1 à 2 jours)","Rapport écrit illustré","Préconisations techniques et budgétaires","Réponses aux questions des artisans"] },
+    { icon:ClipboardList, n:"02", title:"Assistance à la maîtrise d'ouvrage", desc:"Accompagnement tout au long du chantier : sélection des artisans, validation des devis, contrôle de l'avancement et réception des travaux.", details:["Sélection et consultation des artisans","Analyse et négociation des devis","Visites de chantier régulières","Réception et levée des réserves"] },
+    { icon:Layers,        n:"03", title:"Conseil matériaux et techniques",  desc:"Choix des matériaux adaptés au bâti ancien et aux contraintes patrimoniales. Respect des règles des Architectes des Bâtiments de France si nécessaire.", details:["Sélection des matériaux compatibles","Respect des règles patrimoniales","Conseil sur les fournisseurs spécialisés","Formation de vos artisans si besoin"] },
   ];
   return (
-    <section style={{ padding: "5rem 2rem", background: C.white }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
-        <SectionTitle title="Nos prestations" subtitle="Un accompagnement sur mesure à chaque étape de votre projet." />
-        <div className="resp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
-          {services.map((s, i) => (
-            <AnimDiv key={i} delay={i * 100}>
-              <div style={{ display: "flex", flexDirection: "column", height: "100%", border: `1px solid ${C.border}`, background: C.cream, transition: "box-shadow 0.3s ease" }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 10px 30px rgba(61,54,46,0.1)"}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
-              >
-                <div style={{ padding: "2rem", borderBottom: `1px solid ${C.border}` }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
-                    <s.icon size={22} style={{ color: C.goldDark }} aria-hidden="true" />
+    <section style={{ padding:"6rem 2rem", background:C.white }}>
+      <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+        <Reveal style={{ maxWidth:"36rem", marginBottom:"4rem" }}>
+          <Tag>Nos prestations</Tag>
+          <h2 style={{ fontFamily:serif, fontSize:"clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight:600, color:C.dark, lineHeight:1.2, marginBottom:"1rem" }}>Un accompagnement sur mesure à chaque étape.</h2>
+          <GoldLine />
+        </Reveal>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.5rem" }} className="resp-grid-3">
+          {svcs.map((s, i) => (
+            <Reveal key={i} delay={i * 100}>
+              <div style={{ background:C.bg, border:`1px solid ${C.border}`, display:"flex", flexDirection:"column", height:"100%" }}>
+                <div style={{ padding:"2rem", borderBottom:`1px solid ${C.border}` }}>
+                  <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"1rem" }}>
+                    <div style={{ width:44, height:44, background:`${C.gold}14`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <s.icon size={20} style={{ color:C.gold }} aria-hidden="true" />
+                    </div>
+                    <span style={{ fontFamily:mono, fontSize:"0.6rem", color:`${C.gold}80`, letterSpacing:"0.1em" }}>{s.n}</span>
                   </div>
-                  <h3 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 700, color: C.dark, marginBottom: "0.75rem" }}>{s.title}</h3>
-                  <p style={{ fontFamily: body, color: C.mid, fontSize: "0.9rem", lineHeight: 1.7 }}>{s.desc}</p>
+                  <h3 style={{ fontFamily:serif, fontSize:"1.2rem", fontWeight:600, color:C.dark, marginBottom:"0.75rem" }}>{s.title}</h3>
+                  <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.stone, lineHeight:1.75 }}>{s.desc}</p>
                 </div>
-                <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <div style={{ padding:"1.5rem", flex:1 }}>
                   {s.details.map((d, j) => (
-                    <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem" }}>
-                      <Check size={14} style={{ color: C.goldDark, flexShrink: 0, marginTop: "3px" }} aria-hidden="true" />
-                      <span style={{ fontFamily: body, fontSize: "0.85rem", color: C.darkMid, lineHeight: 1.55 }}>{d}</span>
+                    <div key={j} style={{ display:"flex", alignItems:"flex-start", gap:"0.6rem", marginBottom:"0.5rem" }}>
+                      <Check size={13} style={{ color:C.gold, flexShrink:0, marginTop:"3px" }} aria-hidden="true" />
+                      <span style={{ fontFamily:body, fontSize:"0.82rem", color:C.mid, lineHeight:1.6 }}>{d}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{ padding: "1.25rem 2rem", borderTop: `1px solid ${C.border}` }}>
-                  <button
-                    onClick={() => setPage && setPage("contact")}
-                    aria-label={`Prendre rendez-vous pour ${s.title}`}
-                    style={{ width: "100%", padding: "0.75rem", background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                <div style={{ padding:"1.25rem 2rem", borderTop:`1px solid ${C.border}` }}>
+                  <button onClick={() => setPage&&setPage("contact")} aria-label={`Prendre rendez-vous pour ${s.title}`} style={{ width:"100%", padding:"0.75rem", background:C.gold, border:"none", cursor:"pointer", fontFamily:body, fontSize:"0.875rem", fontWeight:500, color:C.white, display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem", transition:"opacity 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
+                    onMouseLeave={e => e.currentTarget.style.opacity="1"}
                   >
-                    <Phone size={14} aria-hidden="true" /> Prendre rendez-vous
+                    <Phone size={13} aria-hidden="true" /> Prendre rendez-vous
                   </button>
                 </div>
               </div>
-            </AnimDiv>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -904,32 +491,32 @@ function ServicesSection({ setPage }) {
 
 function ProcessSection() {
   const steps = [
-    { icon: Phone, num: "01", title: "Prise de contact", desc: "Un appel ou un formulaire en ligne pour décrire votre projet. Nous évaluons ensemble la pertinence d'un diagnostic." },
-    { icon: MapPin, num: "02", title: "Visite et diagnostic", desc: "Analyse sur site du bâtiment : structure, matériaux, humidité, pathologies. Prises de mesures et documentation photographique." },
-    { icon: FileText, num: "03", title: "Rapport et recommandations", desc: "Livraison d'un document clair, pédagogique et hiérarchisé : ce qui est urgent, ce qui peut attendre, les matériaux adaptés." },
-    { icon: Users, num: "04", title: "Suivi et accompagnement", desc: "Mise en relation avec des artisans compétents, validation des devis, contrôle des travaux et réception du chantier." },
+    { icon:Phone,          n:"01", title:"Prise de contact",         desc:"Un appel ou un formulaire en ligne pour décrire votre projet. Nous évaluons ensemble la pertinence d'un diagnostic." },
+    { icon:MapPin,         n:"02", title:"Visite et diagnostic",     desc:"Analyse sur site : structure, matériaux, humidité, pathologies. Prises de mesures et documentation photographique." },
+    { icon:FileText,       n:"03", title:"Rapport et recommandations", desc:"Livraison d'un document clair et pédagogique : ce qui est urgent, ce qui peut attendre, les matériaux adaptés." },
+    { icon:Users,          n:"04", title:"Suivi et accompagnement",  desc:"Mise en relation avec des artisans compétents, validation des devis, contrôle des travaux et réception du chantier." },
   ];
   return (
-    <section style={{ padding: "5rem 2rem", background: C.dark }}>
-      <div style={{ maxWidth: "72rem", margin: "0 auto" }}>
-        <SectionTitle light title="Comment se déroule un accompagnement ?" subtitle="Quatre étapes simples et transparentes." />
-        <div className="resp-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "0", marginTop: "3rem" }}>
+    <section style={{ padding:"6rem 2rem", background:C.dark }}>
+      <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+        <Reveal style={{ maxWidth:"36rem", marginBottom:"4rem" }}>
+          <Tag>Notre processus</Tag>
+          <h2 style={{ fontFamily:serif, fontSize:"clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight:600, color:C.white, lineHeight:1.2, marginBottom:"1rem" }}>Comment se déroule un accompagnement ?</h2>
+          <GoldLine />
+          <p style={{ fontFamily:body, color:"rgba(247,244,239,0.5)", lineHeight:1.8 }}>Quatre étapes simples et transparentes.</p>
+        </Reveal>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"0" }} className="resp-grid-4">
           {steps.map((s, i) => (
-            <AnimDiv key={i} delay={i * 120}>
-              <div style={{ padding: "2rem 1.5rem", borderRight: i < steps.length - 1 ? `1px solid rgba(255,255,255,0.08)` : "none", textAlign: "center", position: "relative" }}>
-                {i < steps.length - 1 && (
-                  <div style={{ position: "absolute", top: "3rem", right: "-1px", width: "0", zIndex: 2 }}>
-                    <div style={{ position: "absolute", top: "-6px", right: "-8px", width: 14, height: 14, borderRadius: "50%", background: C.gold, border: `2px solid ${C.dark}` }} />
-                  </div>
-                )}
-                <div style={{ margin: "0 auto 1.25rem", width: 56, height: 56, borderRadius: "50%", background: `${C.gold}20`, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <s.icon size={24} style={{ color: C.gold }} aria-hidden="true" />
+            <Reveal key={i} delay={i * 100}>
+              <div style={{ padding:"2rem 1.75rem", borderRight: i<3?`1px solid rgba(247,244,239,0.08)`:"none", borderTop:`1px solid rgba(247,244,239,0.08)` }}>
+                <div style={{ width:44, height:44, background:`${C.gold}18`, border:`1px solid ${C.gold}30`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.25rem" }}>
+                  <s.icon size={18} style={{ color:C.gold }} aria-hidden="true" />
                 </div>
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.12em", color: `${C.gold}80`, marginBottom: "0.5rem" }}>{s.num}</p>
-                <h4 style={{ fontFamily: serif, fontSize: "1.05rem", fontWeight: 700, color: C.white, marginBottom: "0.75rem", lineHeight: 1.3 }}>{s.title}</h4>
-                <p style={{ fontFamily: body, color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", lineHeight: 1.7 }}>{s.desc}</p>
+                <p style={{ fontFamily:mono, fontSize:"0.58rem", color:`${C.goldLight}70`, letterSpacing:"0.12em", marginBottom:"0.5rem" }}>{s.n}</p>
+                <h4 style={{ fontFamily:serif, fontSize:"1.1rem", fontWeight:600, color:C.white, marginBottom:"0.65rem", lineHeight:1.3 }}>{s.title}</h4>
+                <p style={{ fontFamily:body, fontSize:"0.85rem", color:"rgba(247,244,239,0.45)", lineHeight:1.75 }}>{s.desc}</p>
               </div>
-            </AnimDiv>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -939,85 +526,74 @@ function ProcessSection() {
 
 function TestimonialsSection() {
   const [idx, setIdx] = useState(0);
-  const [beforeAfter, setBeforeAfter] = useState(50);
+  const [ba, setBa] = useState(50);
   const testimonials = [
-    { initials: "M.D.", name: "Marie D.", project: "Maison XVIIIe - Corrèze", quote: "Grâce à OPTIMA, nous avons restauré notre maison du XVIIIe siècle sans dépassement de budget. Laurent a identifié les vrais problèmes là où trois artisans avaient proposé des travaux inutiles." },
-    { initials: "P.L.", name: "Pierre L.", project: "Château - Périgord", quote: "Un accompagnement exceptionnel pour notre château. Le rapport de diagnostic nous a permis d'économiser plus de 40 000 euros en évitant une reprise structurelle inutile." },
-    { initials: "S.R.", name: "Sophie R.", project: "Moulin - Lot", quote: "Je cherchais quelqu'un qui comprenne vraiment le bâti ancien. Laurent a tout de suite identifié les problèmes d'humidité que les autres confondaient avec des remontées capillaires." },
+    { initials:"M.D.", name:"Marie D.", project:"Maison XVIIIe - Corrèze", quote:"Grâce à OPTIMA, nous avons restauré notre maison du XVIIIe siècle sans dépassement de budget. Laurent a identifié les vrais problèmes là où trois artisans avaient proposé des travaux inutiles." },
+    { initials:"P.L.", name:"Pierre L.", project:"Château - Périgord",     quote:"Un accompagnement exceptionnel pour notre château. Le rapport de diagnostic nous a permis d'économiser plus de 40 000 euros en évitant une reprise structurelle inutile." },
+    { initials:"S.R.", name:"Sophie R.", project:"Moulin - Lot",           quote:"Je cherchais quelqu'un qui comprenne vraiment le bâti ancien. Laurent a tout de suite identifié les problèmes d'humidité que les autres confondaient avec des remontées capillaires." },
   ];
   return (
-    <section style={{ padding: "5rem 2rem", background: C.cream }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
-        <SectionTitle title="Ce que disent nos clients" subtitle="Des propriétaires qui ont fait confiance à l'expertise OPTIMA." />
+    <section style={{ padding:"6rem 2rem", background:C.bg }}>
+      <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+        <Reveal style={{ maxWidth:"36rem", marginBottom:"4rem" }}>
+          <Tag>Témoignages</Tag>
+          <h2 style={{ fontFamily:serif, fontSize:"clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight:600, color:C.dark, lineHeight:1.2, marginBottom:"1rem" }}>Ce que disent nos clients</h2>
+          <GoldLine />
+        </Reveal>
+        <div style={{ display:"grid", gridTemplateColumns:"1.4fr 1fr", gap:"3rem", alignItems:"start" }} className="resp-grid-contact">
+          <Reveal>
+            <div style={{ background:C.white, border:`1px solid ${C.border}`, padding:"3rem" }}>
+              <Quote size={32} style={{ color:`${C.gold}50`, marginBottom:"1.5rem" }} aria-hidden="true" />
+              <blockquote style={{ fontFamily:serif, fontSize:"clamp(1.1rem, 2vw, 1.3rem)", color:C.dark, lineHeight:1.7, fontStyle:"italic", marginBottom:"2rem" }}>
+                "{testimonials[idx].quote}"
+              </blockquote>
+              <div style={{ display:"flex", alignItems:"center", gap:"1rem", marginBottom:"1.5rem" }}>
+                <div style={{ width:40, height:40, background:`${C.gold}18`, border:`1px solid ${C.gold}35`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <span style={{ fontFamily:mono, fontSize:"0.65rem", fontWeight:600, color:C.gold }}>{testimonials[idx].initials}</span>
+                </div>
+                <div>
+                  <p style={{ fontFamily:body, fontWeight:500, color:C.dark, fontSize:"0.9rem" }}>{testimonials[idx].name}</p>
+                  <p style={{ fontFamily:body, color:C.stone, fontSize:"0.8rem" }}>{testimonials[idx].project}</p>
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:"0.4rem" }}>
+                {testimonials.map((_, i) => (
+                  <button key={i} onClick={() => setIdx(i)} aria-label={`Témoignage ${i+1}`} style={{ width:i===idx?24:8, height:8, background:i===idx?C.gold:C.border, border:"none", cursor:"pointer", padding:0, transition:"width 0.3s, background 0.3s" }} />
+                ))}
+              </div>
+            </div>
+          </Reveal>
 
-        {/* Carrousel témoignages */}
-        <AnimDiv>
-          <div style={{ background: C.white, border: `1px solid ${C.border}`, padding: "3rem", marginBottom: "4rem", position: "relative" }}>
-            <div style={{ marginBottom: "1.75rem" }}>
-              <Quote size={36} style={{ color: `${C.gold}60` }} aria-hidden="true" />
-            </div>
-            <blockquote style={{ fontFamily: serif, fontSize: "clamp(1.05rem, 2vw, 1.25rem)", color: C.dark, lineHeight: 1.7, fontStyle: "italic", marginBottom: "1.5rem" }}>
-              "{testimonials[idx].quote}"
-            </blockquote>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.gold}20`, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.7rem", fontWeight: 600, color: C.goldDark }}>{testimonials[idx].initials}</span>
+          <Reveal delay={120}>
+            <p style={{ fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.12em", color:C.gold, marginBottom:"0.5rem" }}>Avant / Après restauration</p>
+            <p style={{ fontFamily:body, fontSize:"0.82rem", color:C.stone, marginBottom:"1rem" }}>Glissez le curseur pour comparer</p>
+            <div
+              style={{ position:"relative", height:"280px", overflow:"hidden", cursor:"col-resize", userSelect:"none", border:`1px solid ${C.border}` }}
+              onMouseMove={e => { const r=e.currentTarget.getBoundingClientRect(); setBa(Math.round(((e.clientX-r.left)/r.width)*100)); }}
+              onTouchMove={e => { const r=e.currentTarget.getBoundingClientRect(); setBa(Math.round(((e.touches[0].clientX-r.left)/r.width)*100)); }}
+              role="img" aria-label="Comparaison avant et après restauration d'un mur en pierre ancienne"
+            >
+              <div style={{ position:"absolute", inset:0, background:"linear-gradient(135deg,#5c4d42,#7a6456)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ textAlign:"center", color:"rgba(247,244,239,0.6)" }}>
+                  <p style={{ fontFamily:mono, fontSize:"0.6rem", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:"0.5rem" }}>Avant</p>
+                  <p style={{ fontFamily:body, fontSize:"0.9rem" }}>Mur dégradé - ciment, humidité</p>
+                </div>
               </div>
-              <div>
-                <p style={{ fontFamily: body, fontWeight: 600, color: C.dark, fontSize: "0.95rem" }}>{testimonials[idx].name}</p>
-                <p style={{ fontFamily: body, color: C.mid, fontSize: "0.82rem" }}>{testimonials[idx].project}</p>
+              <div style={{ position:"absolute", inset:0, clipPath:`inset(0 ${100-ba}% 0 0)`, background:"linear-gradient(135deg,#b89455,#c8a970)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ textAlign:"center", color:"rgba(247,244,239,0.9)" }}>
+                  <p style={{ fontFamily:mono, fontSize:"0.6rem", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:"0.5rem" }}>Après</p>
+                  <p style={{ fontFamily:body, fontSize:"0.9rem" }}>Enduit à la chaux restauré</p>
+                </div>
               </div>
-            </div>
-            {/* Nav */}
-            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem", justifyContent: "flex-end" }}>
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setIdx(i)}
-                  aria-label={`Témoignage de ${testimonials[i].name}`}
-                  style={{ width: i === idx ? 24 : 8, height: 8, borderRadius: 4, background: i === idx ? C.gold : C.border, border: "none", cursor: "pointer", padding: 0, transition: "width 0.3s ease, background 0.3s ease" }}
-                />
-              ))}
-            </div>
-          </div>
-        </AnimDiv>
-
-        {/* Avant/Après */}
-        <AnimDiv>
-          <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.goldDark, marginBottom: "0.5rem" }}>Avant / Après restauration</p>
-            <p style={{ fontFamily: body, color: C.mid, fontSize: "0.9rem" }}>Faites glisser le curseur pour comparer</p>
-          </div>
-          <div
-            style={{ position: "relative", height: "320px", overflow: "hidden", cursor: "col-resize", userSelect: "none", border: `1px solid ${C.border}` }}
-            onMouseMove={e => { const r = e.currentTarget.getBoundingClientRect(); setBeforeAfter(Math.round(((e.clientX - r.left) / r.width) * 100)); }}
-            onTouchMove={e => { const r = e.currentTarget.getBoundingClientRect(); setBeforeAfter(Math.round(((e.touches[0].clientX - r.left) / r.width) * 100)); }}
-            role="img"
-            aria-label="Comparaison avant et après restauration d'un mur en pierre ancienne"
-          >
-            {/* Avant */}
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #6b5a4e 0%, #8c7060 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>Avant</p>
-                <p style={{ fontFamily: serif, fontSize: "1rem" }}>Mur dégradé — ciment, humidité</p>
+              <div style={{ position:"absolute", top:0, bottom:0, left:`${ba}%`, transform:"translateX(-50%)", width:2, background:C.white, pointerEvents:"none" }}>
+                <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:32, height:32, background:C.white, boxShadow:"0 2px 12px rgba(26,22,18,0.3)", display:"flex", alignItems:"center", justifyContent:"center", gap:"3px" }}>
+                  <ChevronDown size={10} style={{ transform:"rotate(90deg)", color:C.gold }} aria-hidden="true" />
+                  <ChevronDown size={10} style={{ transform:"rotate(-90deg)", color:C.gold }} aria-hidden="true" />
+                </div>
               </div>
             </div>
-            {/* Après */}
-            <div style={{ position: "absolute", inset: 0, clipPath: `inset(0 ${100 - beforeAfter}% 0 0)`, background: "linear-gradient(135deg, #c4a45e 0%, #d4b87a 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.9)" }}>
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>Après</p>
-                <p style={{ fontFamily: serif, fontSize: "1rem" }}>Enduit à la chaux restauré</p>
-              </div>
-            </div>
-            {/* Handle */}
-            <div style={{ position: "absolute", top: 0, bottom: 0, left: `${beforeAfter}%`, transform: "translateX(-50%)", width: 3, background: C.white, pointerEvents: "none" }}>
-              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 36, height: 36, borderRadius: "50%", background: C.white, boxShadow: "0 2px 12px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
-                <ChevronDown size={12} style={{ transform: "rotate(90deg)", color: C.goldDark }} aria-hidden="true" />
-                <ChevronDown size={12} style={{ transform: "rotate(-90deg)", color: C.goldDark }} aria-hidden="true" />
-              </div>
-            </div>
-          </div>
-        </AnimDiv>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
@@ -1032,717 +608,452 @@ function HomePage({ setPage }) {
       <ServicesSection setPage={setPage} />
       <ProcessSection />
       <TestimonialsSection />
-      <CTABanner variant="dark" setPage={setPage} />
+      <CTABanner setPage={setPage} />
     </div>
   );
 }
 
 // ─── Page: Erreurs ────────────────────────────────────────────────────────────
-
 function ErreursPage({ setPage }) {
   const [openIdx, setOpenIdx] = useState(null);
-
   const erreurs = [
-    {
-      num: "01",
-      accroche: "Le ciment emprisonne l'humidité",
-      title: "L'emploi du ciment",
-      intro: "Le ciment est incompatible avec la construction ancienne : il ne respire pas, n'est pas souple, et constitue un véritable piège à eau.",
-      detail: "Contrairement aux idées reçues, le ciment n'est pas étanche. Il laisse entrer l'eau mais ne la laisse pas sortir. Résultat : des maisons humides, donc froides, qui favorisent le développement de pathologies graves.",
-      consequences: [
-        "Maison inchauffable — l'énergie sert à évaporer l'eau",
-        "Développement de champignons (mérule…)",
-        "Prolifération d'insectes xylophages (capricornes…)",
-      ],
-      color: "#c0392b",
-    },
-    {
-      num: "02",
-      accroche: "10 % d'humidité en trop = maison inchauffable",
-      title: "Ignorer l'humidité venant du sol",
-      intro: "9 fois sur 10, l'humidité entre par le sol et les bas de murs. Les dispositifs protecteurs des Anciens ont été détruits par des travaux modernes.",
-      detail: "La maison ancienne repose sur des « assises » en contact direct avec la terre. Caniveaux respirants, puits perdus, vides sanitaires — ces systèmes ont été condamnés, rendant les maisons humides.",
-      consequences: [
-        "Affaissement des murs par destructuration du sol",
-        "Maison inchauffable et très coûteuse à chauffer",
-        "Champignons et insectes qui prolifèrent",
-      ],
-      color: "#c0392b",
-    },
-    {
-      num: "03",
-      accroche: "Un bâti ancien obéit à sa propre logique",
-      title: "Modifier la structure sans la comprendre",
-      intro: "Le bâti ancien est souple, équilibré par des poussées et contre-poussées. Les travaux modernes mal conçus brisent cet équilibre.",
-      detail: "Ouvertures non maîtrisées, dalles béton, chaînages inadaptés — ce qui semblait une amélioration devient une source de pathologies structurelles graves.",
-      consequences: [
-        "Surcharges et affaissements des assises",
-        "Éventrements de murs",
-        "Ruptures de linteaux",
-      ],
-      color: "#c0392b",
-    },
-    {
-      num: "04",
-      accroche: "En moyenne 40 % économisés avec un expert",
-      title: "Ne pas faire appel à un expert indépendant",
-      intro: "« Ce qui est mal pensé coûte deux fois à faire. » Un expert indépendant est payé au devis — pas au pourcentage des travaux.",
-      detail: "Il rédige des préconisations précises, définit le projet selon VOS attentes, et répond en temps réel aux questions techniques. Résultat : moins de travaux inutiles, plus d'efficacité.",
-      consequences: [
-        "40 % d'économies en moyenne sur les travaux",
-        "Chantiers bien pensés dès le départ",
-        "Un projet conforme à vos attentes",
-      ],
-      color: C.goldDark,
-    },
+    { num:"01", accroche:"Le ciment emprisonne l'humidité", title:"L'emploi du ciment", intro:"Le ciment est incompatible avec la construction ancienne : il ne respire pas, n'est pas souple, et constitue un véritable piège à eau.", detail:"Contrairement aux idées reçues, le ciment n'est pas étanche. Il laisse entrer l'eau mais ne la laisse pas sortir. Résultat : des maisons humides, donc froides, qui favorisent le développement de pathologies graves.", consequences:["Maison inchauffable et très coûteuse à chauffer","Développement de moisissures et pathologies","Dégradation accélérée des pierres et des maçonneries"] },
+    { num:"02", accroche:"L'isolation intérieure crée de la condensation", title:"L'isolation synthétique", intro:"Isoler par l'intérieur avec des matériaux synthétiques déplace le point de rosée dans le mur, créant de la condensation et de l'humidité.", detail:"Le bâti ancien régule naturellement la vapeur d'eau. Une isolation intérieure mal conçue bloque cette régulation, emprisonnant l'humidité entre le mur et l'isolant. Les moisissures, les décollements et les dégradations structurelles apparaissent progressivement.", consequences:["Condensation et moisissures derrière l'isolant","Décollement des enduits et des revêtements","Dégradation des structures en bois (charpente, planchers)"] },
+    { num:"03", accroche:"Le mauvais diagnostic d'humidité coûte une fortune", title:"L'humidité mal diagnostiquée", intro:"Il existe plusieurs types d'humidité avec des causes et des traitements radicalement différents. Confondre ces types conduit à des traitements inutiles et coûteux.", detail:"Remontées capillaires, condensation, infiltrations, humidité de construction - chaque type d'humidité a une cause précise et un traitement spécifique. Un professionnel non spécialisé confond souvent ces origines et prescrit des travaux inadaptés.", consequences:["Traitements inefficaces (injections, drains inutiles)","Travaux à refaire quelques années plus tard","Factures de plusieurs dizaines de milliers d'euros"] },
+    { num:"04", accroche:"La rénovation énergétique standard dégrade l'ancien", title:"La rénovation énergétique inadaptée", intro:"Les rénovations énergétiques standardisées (double vitrage, VMC, isolation par l'extérieur) sont souvent incompatibles avec le bâti ancien et peuvent le dégrader irrémédiablement.", detail:"Les maisons anciennes en pierre ont une logique propre : forte inertie thermique, murs perspirants, échanges naturels d'air. Leur imposer des solutions conçues pour le bâti moderne perturbe ces équilibres et peut entraîner des pathologies graves.", consequences:["Déséquilibre thermique et hygrométrique","Dégradation de l'aspect architectural","Perte de valeur patrimoniale"] },
   ];
-
   return (
-    <div style={{ background: C.cream, paddingTop: "3.75rem" }}>
-
-      {/* Hero sombre */}
-      <section style={{
-        background: C.dark,
-        padding: "5rem 2rem 4rem",
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {/* Orbe décorative */}
-        <div style={{ position: "absolute", top: "-4rem", right: "-4rem", width: "28rem", height: "28rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}18 0%, transparent 70%)`, pointerEvents: "none" }} />
-        <div style={{ maxWidth: "56rem", margin: "0 auto", position: "relative", zIndex: 1 }}>
-          <AnimDiv direction="up">
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold, marginBottom: "1.25rem" }}>
-              Les 4 erreurs qui coûtent cher dans la restauration du bâti ancien
-            </p>
-            <h1 style={{ fontFamily: serif, fontSize: "clamp(2rem, 5vw, 3.25rem)", fontWeight: 700, color: C.white, lineHeight: 1.15, marginBottom: "1.5rem", maxWidth: "44rem" }}>
-              Ce qui coûte le plus cher,<br />c'est pourtant ce qui semblait souvent logique.
-            </h1>
-            <p style={{ fontFamily: body, fontSize: "1.05rem", color: "rgba(255,255,255,0.6)", maxWidth: "38rem", lineHeight: 1.75 }}>
-              En bâti ancien, les interventions modernes sont souvent inadaptées. Chacune de ces erreurs peut coûter des dizaines de milliers d'euros — parfois sans retour possible.
-            </p>
-          </AnimDiv>
-
-          {/* 4 chiffres */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", marginTop: "3.5rem", background: "rgba(255,255,255,0.08)" }}>
-            {erreurs.map((e, i) => (
-              <button
-                key={i}
-                onClick={() => setOpenIdx(openIdx === i ? null : i)}
-                style={{
-                  background: openIdx === i ? `${C.gold}15` : "transparent",
-                  border: "none", cursor: "pointer", padding: "1.5rem 1rem",
-                  textAlign: "left", transition: "background 0.2s",
-                }}
-              >
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "2rem", fontWeight: 700, color: openIdx === i ? C.gold : "rgba(255,255,255,0.2)", lineHeight: 1, marginBottom: "0.5rem" }}>{e.num}</p>
-                <p style={{ fontFamily: body, fontSize: "0.8rem", color: openIdx === i ? C.gold : "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>{e.accroche}</p>
-              </button>
-            ))}
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      {/* Hero section */}
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>Les erreurs coûteuses</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem", maxWidth:"44rem" }}>
+            Les 4 erreurs qui coûtent cher dans la restauration du bâti ancien
+          </h1>
+          <GoldLine />
+          <p style={{ fontFamily:body, fontSize:"1rem", color:"rgba(247,244,239,0.55)", maxWidth:"38rem", lineHeight:1.8 }}>
+            Ce qui coûte le plus cher, c'est pourtant ce qui semblait souvent logique. En bâti ancien, les interventions modernes sont souvent inadaptées.
+          </p>
+        </div>
+      </section>
+      {/* Accordéon */}
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:"0" }}>
+            {erreurs.map((e, i) => {
+              const isOpen = openIdx === i;
+              return (
+                <Reveal key={i} delay={i * 60}>
+                  <div style={{ border:`1px solid ${C.border}`, borderTop: i===0?"":"none", background:isOpen?C.white:C.bg }}>
+                    <button onClick={() => setOpenIdx(isOpen ? null : i)} aria-expanded={isOpen} style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"2rem 2.5rem", display:"flex", alignItems:"flex-start", gap:"2rem", textAlign:"left" }}>
+                      <span style={{ fontFamily:mono, fontSize:"0.65rem", color:C.gold, letterSpacing:"0.12em", flexShrink:0, paddingTop:"4px" }}>{e.num}</span>
+                      <div style={{ flex:1 }}>
+                        <p style={{ fontFamily:mono, fontSize:"0.6rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.stone, marginBottom:"0.4rem" }}>{e.accroche}</p>
+                        <p style={{ fontFamily:serif, fontSize:"clamp(1.1rem, 2.5vw, 1.4rem)", fontWeight:600, color:C.dark }}>{e.title}</p>
+                        {isOpen && (
+                          <div style={{ marginTop:"1.5rem", paddingTop:"1.5rem", borderTop:`1px solid ${C.border}` }}>
+                            <p style={{ fontFamily:body, color:C.mid, lineHeight:1.8, marginBottom:"1rem" }}>{e.intro}</p>
+                            <p style={{ fontFamily:body, color:C.stone, lineHeight:1.8, marginBottom:"1.25rem", fontSize:"0.9rem" }}>{e.detail}</p>
+                            <div style={{ display:"flex", flexDirection:"column", gap:"0.4rem" }}>
+                              {e.consequences.map((c, j) => (
+                                <div key={j} style={{ display:"flex", alignItems:"flex-start", gap:"0.6rem" }}>
+                                  <X size={13} style={{ color:"#dc2626", flexShrink:0, marginTop:"3px" }} aria-hidden="true" />
+                                  <span style={{ fontFamily:body, fontSize:"0.875rem", color:C.mid }}>{c}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <span style={{ color:C.gold, fontSize:"1.2rem", flexShrink:0 }}>{isOpen?"−":"+"}</span>
+                    </button>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+          <Reveal delay={200}>
+            <div style={{ marginTop:"3rem", background:C.dark, padding:"2.5rem", display:"flex", alignItems:"center", gap:"1.5rem" }}>
+              <Quote size={32} style={{ color:C.gold, flexShrink:0 }} aria-hidden="true" />
+              <p style={{ fontFamily:serif, fontSize:"clamp(1rem, 2vw, 1.25rem)", color:C.white, lineHeight:1.65, fontStyle:"italic" }}>
+                "Ce qui est mal pensé coûte deux fois à faire." Un expert indépendant est payé au devis - pas au pourcentage des travaux.
+              </p>
+            </div>
+          </Reveal>
+          <div style={{ marginTop:"3rem" }}>
+            <CTABanner setPage={setPage} light />
           </div>
         </div>
       </section>
-
-      {/* Accordéon erreurs */}
-      <div style={{ maxWidth: "56rem", margin: "0 auto", padding: "0 2rem 5rem" }}>
-        {erreurs.map((e, i) => {
-          const isOpen = openIdx === i;
-          const isLast = i === 3;
-          return (
-            <AnimDiv key={i} delay={i * 60}>
-              <div style={{ borderBottom: `1px solid ${C.border}` }}>
-                {/* Header cliquable */}
-                <button
-                  onClick={() => setOpenIdx(isOpen ? null : i)}
-                  style={{
-                    width: "100%", background: "none", border: "none",
-                    cursor: "pointer", padding: "1.75rem 0",
-                    display: "flex", alignItems: "center", gap: "1.25rem",
-                    textAlign: "left",
-                  }}
-                >
-                  <span style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: "0.7rem",
-                    color: isOpen ? (isLast ? C.goldDark : e.color) : C.light,
-                    minWidth: "2rem", transition: "color 0.2s",
-                  }}>{e.num}</span>
-                  <h2 style={{
-                    fontFamily: serif, fontSize: "clamp(1.05rem, 2.2vw, 1.3rem)",
-                    fontWeight: 600, color: isOpen ? C.dark : C.darkMid,
-                    flex: 1, lineHeight: 1.3, transition: "color 0.2s",
-                  }}>{e.title}</h2>
-                  <span style={{
-                    width: 28, height: 28, borderRadius: "50%",
-                    background: isOpen ? (isLast ? `${C.gold}20` : "rgba(192,57,43,0.1)") : C.creamMid,
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                    transition: "all 0.2s",
-                  }}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.25s" }}>
-                      <path d="M2 4.5L6 8L10 4.5" stroke={isOpen ? (isLast ? C.goldDark : e.color) : C.mid} strokeWidth="1.5" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </button>
-
-                {/* Contenu accordéon */}
-                <div style={{
-                  maxHeight: isOpen ? "600px" : "0",
-                  overflow: "hidden",
-                  transition: "max-height 0.4s cubic-bezier(0.23,1,0.32,1)",
-                }}>
-                  <div style={{ paddingBottom: "2rem", paddingLeft: "3.25rem" }}>
-                    <p style={{ fontFamily: body, fontSize: "1rem", color: C.darkMid, lineHeight: 1.75, fontWeight: 600, marginBottom: "0.75rem" }}>
-                      {e.intro}
-                    </p>
-                    <p style={{ fontFamily: body, fontSize: "0.93rem", color: C.mid, lineHeight: 1.75, marginBottom: "1.25rem" }}>
-                      {e.detail}
-                    </p>
-                    <div style={{
-                      background: isLast ? `${C.gold}08` : "rgba(192,57,43,0.05)",
-                      borderLeft: `2px solid ${isLast ? C.gold : e.color}`,
-                      padding: "0.9rem 1.25rem",
-                    }}>
-                      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: isLast ? C.goldDark : e.color, marginBottom: "0.6rem" }}>Conséquences</p>
-                      {e.consequences.map((c, j) => (
-                        <p key={j} style={{ fontFamily: body, fontSize: "0.9rem", color: C.darkMid, lineHeight: 1.6, marginBottom: j < e.consequences.length - 1 ? "0.3rem" : 0 }}>
-                          — {c}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </AnimDiv>
-          );
-        })}
-      </div>
-
-      {/* CTA */}
-      <CTABanner variant="dark" setPage={setPage} />
     </div>
   );
 }
 
 // ─── Page: Méthode ────────────────────────────────────────────────────────────
-
 function MethodePage({ setPage }) {
-  const steps = [
-    { icon: Search, step: "Étape 1", title: "Diagnostic précis", text: "Analyse structure, humidité, comportement thermique. Comprendre avant d'agir." },
-    { icon: ClipboardList, step: "Étape 2", title: "Plan de restauration cohérent", text: "Priorités, optimisation budgétaire, suppression des travaux inutiles." },
-    { icon: HardHat, step: "Étape 3", title: "Suivi de chantier", text: "Coordination des artisans spécialisés, contrôle qualité, respect des techniques ancestrales." },
-    { icon: Award, step: "Étape 4", title: "Transmission du savoir", text: "Formation du propriétaire pour entretenir et comprendre son bâtiment durablement." },
-  ];
-  const expertises = [
-    { icon: Users, label: "Accompagnement propriétaires" },
-    { icon: Landmark, label: "Patrimoine classé & inscrit" },
-    { icon: BookOpen, label: "Formation artisans" },
-    { icon: Hammer, label: "Maçonnerie ancienne" },
+  const principes = [
+    { icon:Wind,        title:"Respirabilité des murs",    text:"Le mur ancien est un filtre. Il doit pouvoir évacuer la vapeur d'eau vers l'extérieur. Tout matériau imperméable (ciment, laine de verre) piège l'humidité et crée des pathologies." },
+    { icon:Thermometer, title:"Inertie thermique",         text:"La masse thermique de la pierre accumule la chaleur et la restitue progressivement. C'est le chauffage naturel du bâti ancien - plus efficace que n'importe quelle isolation synthétique si bien exploité." },
+    { icon:Droplets,    title:"Gestion de l'humidité",     text:"L'humidité dans le bâti ancien est normale et gérée naturellement. Le problème survient quand on bloque cette gestion. Le diagnostic préalable est indispensable pour distinguer les types d'humidité." },
+    { icon:Leaf,        title:"Matériaux naturels",        text:"Chaux aérienne, enduits à la chaux, terre crue, chanvre, bois - ces matériaux sont compatibles avec la structure ancienne et se 'réparent' naturellement. Ils sont aussi plus sains et écologiques." },
+    { icon:Sun,         title:"Bioclimatisme passif",      text:"Le bâti ancien a été conçu pour le climat local : orientation, épaisseur des murs, débords de toiture. Comprendre cette conception permet d'optimiser le confort sans travaux lourds." },
+    { icon:Award,       title:"Réversibilité",             text:"Toute intervention sur un bâti ancien doit être réversible. Un enduit à la chaux peut être refait. Du ciment projeté sur une pierre tendre est irréparable. C'est un principe fondamental." },
   ];
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle title="La méthode OPTIMA" subtitle="Une approche rigoureuse en 4 étapes pour restaurer sans gaspiller." />
-        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
-          {steps.map((s, i) => (
-            <AnimDiv key={i} delay={i * 100}>
-              <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "2rem" }}>
-                <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-                  <GoldIcon icon={s.icon} />
-                  <div>
-                    <span style={{ fontFamily: body, fontSize: "0.8rem", color: C.gold, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.step}</span>
-                    <h3 style={{ fontFamily: serif, fontSize: "1.2rem", fontWeight: 600, color: C.dark, margin: "0.25rem 0 0.5rem" }}>{s.title}</h3>
-                    <p style={{ fontFamily: body, color: C.mid, fontSize: "0.95rem", lineHeight: 1.65 }}>{s.text}</p>
-                  </div>
-                </div>
-              </div>
-            </AnimDiv>
-          ))}
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>Notre méthode</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem", maxWidth:"44rem" }}>
+            Une approche fondée sur les principes du bâti ancien
+          </h1>
+          <GoldLine />
+          <p style={{ fontFamily:body, fontSize:"1rem", color:"rgba(247,244,239,0.55)", maxWidth:"36rem", lineHeight:1.8 }}>
+            La restauration efficace d'un bâti ancien repose sur des principes physiques simples que la majorité des artisans contemporains ignorent.
+          </p>
         </div>
-        <AnimDiv>
-          <div style={{ background: C.dark, borderRadius: "1rem", padding: "2.5rem 3rem", marginBottom: "3rem" }}>
-            <p style={{ fontFamily: serif, fontSize: "1.1rem", color: C.white, textAlign: "center", marginBottom: "2rem" }}>Domaines d'expertise</p>
-            <div className="resp-grid-4" style={{display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"1rem"}}>
-              {expertises.map((e, i) => (
-                <div key={i} style={{ textAlign: "center" }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${C.gold}22`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 0.75rem" }}>
-                    <e.icon size={22} style={{ color: C.gold }} />
+      </section>
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0" }} className="resp-grid-3">
+            {principes.map((p, i) => (
+              <Reveal key={i} delay={i * 80}>
+                <div style={{ padding:"2.5rem 2rem", border:`1px solid ${C.border}`, borderTop: i<3?"":i===3?`1px solid ${C.border}`:"none", borderRight: (i+1)%3===0?"none":`1px solid ${C.border}`, background:C.white }}>
+                  <div style={{ width:44, height:44, background:`${C.gold}14`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.25rem" }}>
+                    <p.icon size={20} style={{ color:C.gold }} aria-hidden="true" />
                   </div>
-                  <p style={{ fontFamily: body, fontSize: "0.9rem", color: "rgba(255,255,255,0.8)" }}>{e.label}</p>
+                  <h3 style={{ fontFamily:serif, fontSize:"1.15rem", fontWeight:600, color:C.dark, marginBottom:"0.75rem" }}>{p.title}</h3>
+                  <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.stone, lineHeight:1.75 }}>{p.text}</p>
                 </div>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </AnimDiv>
-        <CTABanner />
-      </div>
+          <div style={{ marginTop:"4rem" }}>
+            <CTABanner setPage={setPage} light />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
 // ─── Page: Tarifs ─────────────────────────────────────────────────────────────
-
 function TarifsPage({ setPage }) {
-  const essentialFeatures = [
-    "Diagnostic ciblé sur site",
-    "Rapport écrit détaillé",
-    "Plan d'action priorisé",
-    "Réponse sous 48h",
+  const prestations = [
+    { label:"Diagnostic simple (demi-journée)", price:"450 €" },
+    { label:"Diagnostic complet avec rapport (journée)", price:"850 €" },
+    { label:"Expertise humidité spécialisée", price:"550 €" },
+    { label:"AMO ponctuelle (consultation)", price:"200 €/h" },
+    { label:"AMO chantier (forfait mensuel)", price:"Sur devis" },
+    { label:"Conférence ou formation", price:"Sur devis" },
   ];
-  const expertFeatures = [
-    "Analyse globale du bâtiment",
-    "Rapport complet + préconisations",
-    "Suivi artisans disponible",
-    "Réponse en temps réel",
-    "Économies moyennes : 40 %",
-  ];
-  const autresServices = [
-    { icon: FileText, label: "Rapport pour notaire / assurance", price: "Sur devis" },
-    { icon: ClipboardCheck, label: "Suivi de chantier de restauration", price: "Sur devis" },
-    { icon: HardHat, label: "Assistance maîtrise d'œuvre", price: "Sur devis" },
-    { icon: Home, label: "Audit avant acquisition", price: "500 – 900 €" },
-  ];
-
   const chateauFeatures = [
-    "Diagnostic structurel complet",
-    "Rapport patrimonial détaillé",
-    "Préconisations artisans spécialisés",
-    "Coordination des corps de métier",
-    "Suivi de chantier dédié",
-    "Optimisation budgétaire",
-    "Conformité monuments historiques",
+    "Diagnostic patrimonial complet","Plan de restauration pluriannuel","Coordination avec ABF si nécessaire","Suivi de chantier et réception des travaux","Rapport intermédiaires réguliers","Mise en relation artisans spécialisés",
   ];
-
   return (
-    <div style={{ background: C.cream, paddingTop: "3.75rem" }}>
-
-      {/* Hero sobre */}
-      <section style={{ padding: "4.5rem 2rem 3.5rem", textAlign: "center" }}>
-        <AnimDiv direction="up">
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.goldDark, marginBottom: "0.9rem" }}>Tarifs & Prestations</p>
-          <h1 style={{ fontFamily: serif, fontSize: "clamp(1.9rem, 4vw, 2.75rem)", fontWeight: 700, color: C.dark, lineHeight: 1.2, marginBottom: "1rem" }}>
-            Des interventions claires,<br />sans engagement superflu.
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>Tarifs</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem", maxWidth:"44rem" }}>
+            Des honoraires transparents, adaptés à chaque projet
           </h1>
-          <p style={{ fontFamily: body, fontSize: "1rem", color: C.mid, maxWidth: "34rem", margin: "0 auto", lineHeight: 1.75 }}>
-            Chaque prestation est calibrée pour votre situation. Un expert payé au devis — jamais au pourcentage des travaux.
+          <GoldLine />
+          <p style={{ fontFamily:body, fontSize:"1rem", color:"rgba(247,244,239,0.55)", maxWidth:"36rem", lineHeight:1.8 }}>
+            Les tarifs varient selon le type de bâtiment, sa surface et la nature des travaux envisagés. Un devis précis est établi après un premier échange.
           </p>
-        </AnimDiv>
-      </section>
-
-      {/* 2 cartes principales */}
-      <div style={{ maxWidth: "62rem", margin: "0 auto", padding: "0 2rem 4rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
-
-          {/* Carte Essentiel — claire */}
-          <AnimDiv delay={0}>
-            <div style={{
-              background: C.white,
-              border: `1px solid ${C.border}`,
-              borderRadius: "1.25rem",
-              overflow: "hidden",
-              height: "100%",
-              display: "flex", flexDirection: "column",
-            }}>
-              <div style={{ padding: "2rem 2rem 1.5rem", borderBottom: `1px solid ${C.border}` }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-                  <div>
-                    <h2 style={{ fontFamily: serif, fontSize: "1.6rem", fontWeight: 700, color: C.dark, marginBottom: "0.2rem" }}>Diagnostic ciblé</h2>
-                    <p style={{ fontFamily: body, fontSize: "0.875rem", color: C.mid }}>Un désordre spécifique à analyser.</p>
-                  </div>
-                  <span style={{ fontFamily: body, fontSize: "0.7rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: C.mid, background: C.creamMid, border: `1px solid ${C.border}`, padding: "0.2rem 0.6rem", borderRadius: "2rem" }}>Ponctuel</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "0.25rem", marginBottom: "1.5rem" }}>
-                  <span style={{ fontFamily: serif, fontSize: "2.8rem", fontWeight: 700, color: C.dark, letterSpacing: "-0.02em" }}>150</span>
-                  <span style={{ fontFamily: body, color: C.mid, fontSize: "1rem" }}>– 400 €</span>
-                </div>
-                <button
-                  onClick={() => setPage("contact")}
-                  style={{
-                    width: "100%", padding: "0.85rem", borderRadius: "0.6rem",
-                    background: C.dark, color: C.white,
-                    border: "none", cursor: "pointer",
-                    fontFamily: body, fontSize: "0.9rem", fontWeight: 600,
-                    transition: "opacity 0.18s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                >
-                  Prendre rendez-vous
-                </button>
-              </div>
-              <div style={{ padding: "1.5rem 2rem", flex: 1 }}>
-                {essentialFeatures.map((f, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: i < essentialFeatures.length - 1 ? "0.75rem" : 0 }}>
-                    <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.dark, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Check size={9} color="#fff" strokeWidth={2.5} />
-                    </div>
-                    <span style={{ fontFamily: body, fontSize: "0.88rem", color: C.darkMid }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </AnimDiv>
-
-          {/* Carte Expert — sombre */}
-          <AnimDiv delay={80}>
-            <div style={{
-              background: C.dark,
-              border: `2px solid ${C.gold}60`,
-              borderRadius: "1.25rem",
-              overflow: "hidden",
-              height: "100%",
-              display: "flex", flexDirection: "column",
-              boxShadow: `0 16px 50px ${C.gold}18`,
-              position: "relative",
-            }}>
-              {/* Badge */}
-              <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", background: C.gold, color: C.white, fontSize: "0.65rem", fontFamily: body, fontWeight: 700, padding: "0.2rem 0.65rem", borderRadius: "2rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Recommandé</div>
-
-              <div style={{ padding: "2rem 2rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                <div style={{ marginBottom: "1.25rem" }}>
-                  <h2 style={{ fontFamily: serif, fontSize: "1.6rem", fontWeight: 700, color: C.white, marginBottom: "0.2rem" }}>Visite conseil</h2>
-                  <p style={{ fontFamily: body, fontSize: "0.875rem", color: "rgba(255,255,255,0.5)" }}>Analyse globale du bâtiment.</p>
-                </div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "0.25rem", marginBottom: "1.5rem" }}>
-                  <span style={{ fontFamily: serif, fontSize: "2.8rem", fontWeight: 700, color: C.white, letterSpacing: "-0.02em" }}>800</span>
-                  <span style={{ fontFamily: body, color: "rgba(255,255,255,0.45)", fontSize: "1rem" }}>€ fixe</span>
-                </div>
-                <button
-                  onClick={() => setPage("contact")}
-                  style={{
-                    width: "100%", padding: "0.85rem", borderRadius: "0.6rem",
-                    background: C.white, color: C.dark,
-                    border: "none", cursor: "pointer",
-                    fontFamily: body, fontSize: "0.9rem", fontWeight: 700,
-                    transition: "opacity 0.18s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                >
-                  Demander un devis
-                </button>
-              </div>
-              <div style={{ padding: "1.5rem 2rem", flex: 1 }}>
-                {expertFeatures.map((f, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: i < expertFeatures.length - 1 ? "0.75rem" : 0 }}>
-                    <div style={{ width: 16, height: 16, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Check size={9} color="rgba(255,255,255,0.8)" strokeWidth={2.5} />
-                    </div>
-                    <span style={{ fontFamily: body, fontSize: "0.88rem", color: "rgba(255,255,255,0.7)" }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </AnimDiv>
         </div>
-
-        {/* Carte Châteaux — pleine largeur */}
-        <AnimDiv delay={110}>
-          <div style={{
-            background: C.dark,
-            backgroundImage: `linear-gradient(135deg, rgba(42,37,31,0.97) 0%, rgba(61,54,46,0.97) 100%)`,
-            border: `1px solid ${C.gold}40`,
-            marginBottom: "3rem",
-            overflow: "hidden",
-            position: "relative",
-          }}>
-            {/* Orbe décorative */}
-            <div style={{ position: "absolute", top: "-4rem", right: "-4rem", width: "20rem", height: "20rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}18 0%, transparent 70%)`, pointerEvents: "none" }} />
-
-            <div className="resp-grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", position: "relative", zIndex: 1 }}>
-              {/* Gauche — description */}
-              <div style={{ padding: "2.5rem 2.5rem 2.5rem 2.5rem", borderRight: `1px solid ${C.gold}20` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-                  <Landmark size={18} style={{ color: C.gold }} />
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold }}>Offre grands édifices</span>
-                </div>
-                <h3 style={{ fontFamily: serif, fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1rem" }}>
-                  Rénovation de châteaux<br />& grandes demeures
-                </h3>
-                <p style={{ fontFamily: body, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.75, marginBottom: "1.75rem" }}>
-                  Un accompagnement complet et sur mesure pour les bâtiments d'exception — du diagnostic initial au suivi de chantier, en préservant l'authenticité et la valeur patrimoniale de votre bien.
-                </p>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "2rem" }}>
-                  <span style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 700, color: C.white }}>Sur devis</span>
-                  <span style={{ fontFamily: body, fontSize: "0.8rem", color: "rgba(255,255,255,0.35)" }}>— déplacement inclus</span>
-                </div>
-                <button
-                  onClick={() => setPage("contact")}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.85rem 1.75rem",
-                    background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
-                    border: "none", cursor: "pointer",
-                    fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.white,
-                    boxShadow: `0 6px 20px ${C.gold}35`,
-                    transition: "opacity 0.18s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                >
-                  <Mail size={14} /> Demander un devis
-                </button>
-              </div>
-
-              {/* Droite — features */}
-              <div style={{ padding: "2.5rem" }}>
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", marginBottom: "1.25rem" }}>Inclus dans la prestation</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-                  {chateauFeatures.map((f, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-                      <div style={{ width: 20, height: 20, borderRadius: "50%", border: `1px solid ${C.gold}50`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <Check size={10} color={C.gold} strokeWidth={2.5} />
-                      </div>
-                      <span style={{ fontFamily: body, fontSize: "0.88rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.4 }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </AnimDiv>
-
-        {/* Autres prestations — liste sobre */}
-        <AnimDiv delay={120}>
-          <div style={{ marginBottom: "2.5rem" }}>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: C.light, marginBottom: "1rem" }}>Autres prestations</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.75rem" }}>
-              {autresServices.map((s, i) => (
-                <div key={i} style={{
-                  display: "flex", alignItems: "center", gap: "1rem",
-                  background: C.white, border: `1px solid ${C.border}`,
-                  padding: "1rem 1.25rem",
-                }}>
-                  <s.icon size={16} style={{ color: C.goldDark, flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: body, fontSize: "0.875rem", color: C.darkMid, lineHeight: 1.4 }}>{s.label}</p>
-                  </div>
-                  <span style={{ fontFamily: body, fontSize: "0.8rem", fontWeight: 600, color: C.goldDark, whiteSpace: "nowrap" }}>{s.price}</span>
+      </section>
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          {/* Prestations courantes */}
+          <Reveal style={{ marginBottom:"4rem" }}>
+            <Tag>Prestations courantes</Tag>
+            <h2 style={{ fontFamily:serif, fontSize:"clamp(1.4rem, 2.5vw, 2rem)", fontWeight:600, color:C.dark, marginBottom:"2rem" }}>Diagnostics et conseils</h2>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"0" }} className="resp-grid-2">
+              {prestations.map((p, i) => (
+                <div key={i} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 1.75rem", border:`1px solid ${C.border}`, borderTop: i<2?"":"none", background:C.white, gap:"1rem" }}>
+                  <span style={{ fontFamily:body, fontSize:"0.9rem", color:C.darkMid }}>{p.label}</span>
+                  <span style={{ fontFamily:mono, fontSize:"0.82rem", fontWeight:600, color:C.gold, whiteSpace:"nowrap" }}>{p.price}</span>
                 </div>
               ))}
             </div>
-          </div>
-        </AnimDiv>
+          </Reveal>
 
-        {/* Note déplacement */}
-        <AnimDiv delay={160}>
-          <div style={{ background: C.creamMid, borderLeft: `3px solid ${C.gold}`, padding: "1rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <MapPin size={16} style={{ color: C.goldDark, flexShrink: 0 }} />
-            <div>
-              <p style={{ fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.dark }}>Déplacement inclus dans un rayon de 40 km</p>
-              <p style={{ fontFamily: body, fontSize: "0.8rem", color: C.mid }}>Intervention possible partout en France selon les projets.</p>
+          {/* Offre grands édifices */}
+          <Reveal delay={100}>
+            <Tag>Offre grands édifices</Tag>
+            <div style={{ background:C.dark, border:`1px solid ${C.gold}30` }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr" }} className="resp-grid-2">
+                <div style={{ padding:"3rem", borderRight:`1px solid ${C.gold}15` }}>
+                  <Landmark size={20} style={{ color:C.gold, marginBottom:"1rem" }} aria-hidden="true" />
+                  <h3 style={{ fontFamily:serif, fontSize:"clamp(1.4rem, 2.5vw, 2rem)", fontWeight:600, color:C.white, lineHeight:1.2, marginBottom:"1rem" }}>
+                    Rénovation de châteaux et grandes demeures
+                  </h3>
+                  <p style={{ fontFamily:body, fontSize:"0.9rem", color:"rgba(247,244,239,0.55)", lineHeight:1.8, marginBottom:"2rem" }}>
+                    Un accompagnement complet et sur mesure pour les bâtiments d'exception - du diagnostic initial au suivi de chantier, en préservant l'authenticité et la valeur patrimoniale.
+                  </p>
+                  <p style={{ fontFamily:serif, fontSize:"1.4rem", fontWeight:600, color:C.white, marginBottom:"0.3rem" }}>Sur devis</p>
+                  <p style={{ fontFamily:body, fontSize:"0.82rem", color:`${C.goldLight}80`, marginBottom:"2rem" }}>Déplacement inclus dans un rayon de 40 km</p>
+                  <button onClick={() => setPage&&setPage("contact")} style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", padding:"0.85rem 1.75rem", background:C.gold, border:"none", cursor:"pointer", fontFamily:body, fontSize:"0.9rem", fontWeight:500, color:C.white, transition:"opacity 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
+                    onMouseLeave={e => e.currentTarget.style.opacity="1"}
+                  >
+                    <Mail size={14} aria-hidden="true" /> Demander un devis
+                  </button>
+                </div>
+                <div style={{ padding:"3rem" }}>
+                  <p style={{ fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:`${C.goldLight}60`, marginBottom:"1.5rem" }}>Inclus dans la prestation</p>
+                  <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem" }}>
+                    {chateauFeatures.map((f, i) => (
+                      <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:"0.75rem" }}>
+                        <div style={{ width:18, height:18, border:`1px solid ${C.gold}50`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:"2px" }}>
+                          <Check size={9} style={{ color:C.gold }} aria-hidden="true" />
+                        </div>
+                        <span style={{ fontFamily:body, fontSize:"0.875rem", color:"rgba(247,244,239,0.6)", lineHeight:1.5 }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </AnimDiv>
-      </div>
+          </Reveal>
 
-      <CTABanner variant="dark" setPage={setPage} />
+          {/* Note déplacement */}
+          <Reveal delay={150}>
+            <div style={{ marginTop:"2rem", background:C.white, border:`1px solid ${C.border}`, borderLeft:`3px solid ${C.gold}`, padding:"1.25rem 1.75rem", display:"flex", alignItems:"center", gap:"1rem" }}>
+              <MapPin size={16} style={{ color:C.gold, flexShrink:0 }} aria-hidden="true" />
+              <div>
+                <p style={{ fontFamily:body, fontSize:"0.9rem", fontWeight:500, color:C.dark, marginBottom:"0.2rem" }}>Déplacement inclus dans un rayon de 40 km</p>
+                <p style={{ fontFamily:body, fontSize:"0.82rem", color:C.stone }}>Intervention possible partout en France selon les projets.</p>
+              </div>
+            </div>
+          </Reveal>
+
+          <div style={{ marginTop:"4rem" }}>
+            <CTABanner setPage={setPage} light />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
 // ─── Page: Châteaux ───────────────────────────────────────────────────────────
-
 function ChateauxPage({ setPage }) {
-  const risks = [
-    "Sa valeur patrimoniale", "Son authenticité",
-    "Sa cohérence structurelle", "Des centaines de milliers d'euros",
-  ];
-  const roles = [
-    { icon: Shield, text: "Préserver l'intégrité architecturale" },
-    { icon: Ban, text: "Éviter les interventions destructrices" },
-    { icon: Wallet, text: "Optimiser les budgets de restauration" },
-    { icon: ListChecks, text: "Prioriser les travaux réellement nécessaires" },
+  const specifics = [
+    { icon:Landmark,      title:"Diagnotic patrimonial",     text:"Analyse complète des structures, des maçonneries, des charpentes et des éléments décoratifs. Identification des pathologies spécifiques aux grandes demeures." },
+    { icon:FileText,      title:"Plan de restauration",      text:"Document de référence pluriannuel définissant les priorités, les matériaux, les méthodes et les budgets. Indispensable pour piloter un chantier complexe." },
+    { icon:Users,         title:"Coordination ABF",          text:"Interface avec les Architectes des Bâtiments de France pour les bâtiments classés ou en zone protégée. Connaissance des règles et des exigences patrimoniales." },
+    { icon:HardHat,       title:"Suivi de chantier",         text:"Présence régulière sur le chantier, contrôle de la conformité des travaux, réunions de chantier, réception des ouvrages et levée des réserves." },
   ];
   return (
-    <div style={{ paddingTop: "5rem", paddingBottom: "4rem" }}>
-      <section style={{ position: "relative", padding: "5rem 2rem", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${IMG_HERO})`, backgroundSize: "cover", backgroundPosition: "center" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(2,6,23,0.88) 0%, rgba(42,37,31,0.75) 100%)" }} />
-        <div style={{ position: "relative", zIndex: 10, maxWidth: "64rem", margin: "0 auto", textAlign: "center" }}>
-          <AnimDiv>
-            <h1 style={{ fontFamily: serif, fontSize: "clamp(2rem, 4.5vw, 3.5rem)", fontWeight: 700, color: C.white, lineHeight: 1.25, marginBottom: "1rem" }}>
-              Propriétaires de châteaux,<br /><span style={{ color: C.gold }}>manoirs, grandes demeures</span>
-            </h1>
-            <p style={{ fontFamily: body, color: "rgba(255,255,255,0.7)", fontSize: "1.1rem" }}>Un accompagnement sur mesure pour les bâtiments d'exception.</p>
-          </AnimDiv>
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>Châteaux et grandes demeures</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem", maxWidth:"44rem" }}>
+            L'expertise au service du patrimoine exceptionnel
+          </h1>
+          <GoldLine />
+          <p style={{ fontFamily:body, fontSize:"1rem", color:"rgba(247,244,239,0.55)", maxWidth:"38rem", lineHeight:1.8 }}>
+            La restauration d'un château ou d'une grande demeure historique requiert une expertise spécifique, une connaissance des règles patrimoniales et une expérience des chantiers complexes.
+          </p>
         </div>
       </section>
-
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "4rem 2rem" }}>
-        <AnimDiv>
-          <div style={{ background: "rgba(254,242,242,0.6)", border: "1px solid rgba(252,165,165,0.4)", borderRadius: "1rem", padding: "2.5rem", marginBottom: "4rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-              <AlertTriangle size={22} style={{ color: "#f87171" }} />
-              <h3 style={{ fontFamily: serif, fontSize: "1.2rem", fontWeight: 600, color: C.dark }}>Un bâtiment historique mal restauré peut perdre :</h3>
-            </div>
-            <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"0.75rem"}}>
-              {risks.map((r, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: C.white, borderRadius: "0.75rem", padding: "1rem 1.25rem", border: "1px solid rgba(252,165,165,0.25)" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f87171", flexShrink: 0 }} />
-                  <p style={{ fontFamily: body, color: C.darkMid, fontSize: "0.95rem" }}>{r}</p>
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"0" }} className="resp-grid-2">
+            {specifics.map((s, i) => (
+              <Reveal key={i} delay={i * 80}>
+                <div style={{ padding:"2.5rem", border:`1px solid ${C.border}`, borderTop: i<2?"":"none", borderRight: i%2===0?`1px solid ${C.border}`:"none", background:C.white }}>
+                  <div style={{ width:44, height:44, background:`${C.gold}14`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.25rem" }}>
+                    <s.icon size={20} style={{ color:C.gold }} aria-hidden="true" />
+                  </div>
+                  <h3 style={{ fontFamily:serif, fontSize:"1.2rem", fontWeight:600, color:C.dark, marginBottom:"0.65rem" }}>{s.title}</h3>
+                  <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.stone, lineHeight:1.75 }}>{s.text}</p>
                 </div>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </AnimDiv>
-
-        <SectionTitle title="Le rôle de l'expert" subtitle="Intervenir avant, pendant et après les travaux pour protéger votre patrimoine." />
-        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1rem", marginBottom:"4rem"}}>
-          {roles.map((r, i) => (
-            <AnimDiv key={i} delay={i * 80}>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.white, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "1.5rem" }}>
-                <GoldIcon icon={r.icon} />
-                <p style={{ fontFamily: body, color: C.darkMid, fontSize: "1rem" }}>{r.text}</p>
-              </div>
-            </AnimDiv>
-          ))}
+          <div style={{ marginTop:"4rem" }}>
+            <CTABanner setPage={setPage} light />
+          </div>
         </div>
-        <CTABanner variant="dark" />
-      </div>
+      </section>
     </div>
   );
 }
 
 // ─── Page: Projets ────────────────────────────────────────────────────────────
-
 function ProjetsPage({ setPage }) {
   const projects = [
-    { title: "Maisons paysannes de France", desc: "Président de l'association Maisons Paysannes de France en Corrèze, préservation du patrimoine rural.", image: IMG_PROJET },
-    { title: "Chantiers participatifs", desc: "Accompagnement et formation de propriétaires sur des chantiers concrets de restauration.", image: IMG_PROJET },
-    { title: "Village de Clédat", desc: "Restauration d'un village abandonné en Corrèze, patrimoine remarquable en milieu forestier.", image: IMG_PROJET },
-    { title: "Projet béton romain", desc: "Recherche et expérimentation autour des mortiers anciens et du béton romain.", image: IMG_PROJET },
-    { title: "Formations artisans", desc: "Programmes de formation pour artisans souhaitant se spécialiser dans la restauration du bâti ancien.", image: IMG_PROJET },
-    { title: "Châteaux en Périgord", desc: "Diagnostics et plans de restauration pour plusieurs demeures historiques en Dordogne.", image: IMG_PROJET },
+    { title:"Maisons paysannes de France", desc:"Président de l'association Maisons Paysannes de France en Corrèze, préservation du patrimoine rural.", tag:"Association", image:IMG_PROJET },
+    { title:"Chantiers participatifs",      desc:"Accompagnement et formation de propriétaires sur des chantiers concrets de restauration.",            tag:"Formation",   image:IMG_PROJET },
+    { title:"Village de Clédat",            desc:"Restauration d'un village abandonné en Corrèze, patrimoine remarquable en milieu forestier.",          tag:"Patrimoine",  image:IMG_PROJET },
+    { title:"Projet béton romain",          desc:"Recherche et expérimentation autour des mortiers anciens et du béton romain.",                         tag:"Recherche",   image:IMG_PROJET },
+    { title:"Formations artisans",          desc:"Programmes de formation pour artisans souhaitant se spécialiser dans la restauration du bâti ancien.", tag:"Formation",   image:IMG_PROJET },
+    { title:"Châteaux en Périgord",         desc:"Diagnostics et plans de restauration pour plusieurs demeures historiques en Dordogne.",                tag:"Expertise",   image:IMG_PROJET },
   ];
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "72rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle title="Projets & Réalisations" subtitle="Une sélection de chantiers emblématiques et d'actions de terrain." />
-        <div className="resp-grid-3" style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
-          {projects.map((p, i) => (
-            <AnimDiv key={i} delay={i * 80}>
-              <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: `1px solid ${C.border}`, background: C.white, transition: "box-shadow 0.3s ease" }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 12px 36px rgba(61,54,46,0.12)"}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
-              >
-                <div style={{ height: "200px", overflow: "hidden" }}>
-                  <img src={p.image} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
-                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                  />
-                </div>
-                <div style={{ padding: "1.5rem" }}>
-                  <h3 style={{ fontFamily: serif, fontSize: "1.1rem", fontWeight: 600, color: C.dark, marginBottom: "0.5rem" }}>{p.title}</h3>
-                  <p style={{ fontFamily: body, color: C.mid, fontSize: "0.92rem", lineHeight: 1.65 }}>{p.desc}</p>
-                </div>
-              </div>
-            </AnimDiv>
-          ))}
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>Projets et réalisations</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem", maxWidth:"44rem" }}>
+            Une sélection de chantiers emblématiques
+          </h1>
+          <GoldLine />
         </div>
-        <CTABanner variant="dark" />
-      </div>
+      </section>
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.5rem", marginBottom:"4rem" }} className="resp-grid-3">
+            {projects.map((p, i) => (
+              <Reveal key={i} delay={i * 70}>
+                <div style={{ border:`1px solid ${C.border}`, background:C.white, overflow:"hidden", transition:"box-shadow 0.3s" }}
+                  onMouseEnter={e => e.currentTarget.style.boxShadow="0 12px 32px rgba(26,22,18,0.1)"}
+                  onMouseLeave={e => e.currentTarget.style.boxShadow="none"}
+                >
+                  <div style={{ height:"200px", overflow:"hidden", background:C.surface }}>
+                    <img src={p.image} alt={p.title} loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover", transition:"transform 0.4s ease" }}
+                      onMouseEnter={e => e.currentTarget.style.transform="scale(1.04)"}
+                      onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}
+                    />
+                  </div>
+                  <div style={{ padding:"1.5rem" }}>
+                    <span style={{ fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.gold, display:"block", marginBottom:"0.5rem" }}>{p.tag}</span>
+                    <h3 style={{ fontFamily:serif, fontSize:"1.1rem", fontWeight:600, color:C.dark, marginBottom:"0.5rem" }}>{p.title}</h3>
+                    <p style={{ fontFamily:body, color:C.stone, fontSize:"0.875rem", lineHeight:1.65 }}>{p.desc}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          <CTABanner setPage={setPage} light />
+        </div>
+      </section>
     </div>
   );
 }
 
 // ─── Page: Conférences ────────────────────────────────────────────────────────
-
 function ConferencesPage({ setPage }) {
-  const formats = [
-    { icon: Mic, title: "Conférences", desc: "Interventions sur la restauration du bâti ancien, l'humidité, les matériaux." },
-    { icon: BookOpen, title: "Formations", desc: "Programmes de formation pour propriétaires et artisans." },
-    { icon: Calendar, title: "Stages pratiques", desc: "Apprentissage sur chantier : enduits, maçonnerie, chaux." },
+  const themes = [
+    { icon:BookOpen, title:"Les erreurs à éviter en bâti ancien",    desc:"Conférence de sensibilisation pour propriétaires et collectivités. Durée : 1h30 à 2h." },
+    { icon:Hammer,   title:"Techniques de maçonnerie traditionnelle", desc:"Formation pratique sur les enduits à la chaux, taille de pierre et mortiers anciens. Durée : 1 à 3 jours." },
+    { icon:Droplets, title:"Comprendre et traiter l'humidité",       desc:"Atelier diagnostic pour distinguer les types d'humidité et les solutions adaptées. Durée : 1 journée." },
+    { icon:Leaf,     title:"Matériaux naturels et bioconstruction",  desc:"Présentation des matériaux traditionnels et de leurs applications en restauration. Durée : 2h." },
   ];
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle
-          title={<>Restaurer sa maison<br /><span style={{ color: C.goldDark }}>sans ruiner son couple</span></>}
-          subtitle="Conférences, formations, stages."
-        />
-        <AnimDiv>
-          <p style={{ textAlign: "center", fontFamily: body, color: C.mid, fontSize: "1.1rem", marginBottom: "4rem", maxWidth: "36rem", margin: "0 auto 4rem" }}>
-            Objectif : rendre la restauration plus simple, plus naturelle et plus sereine.
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>Conférences et formations</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem", maxWidth:"44rem" }}>
+            Transmettre le savoir-faire du bâti ancien
+          </h1>
+          <GoldLine />
+          <p style={{ fontFamily:body, fontSize:"1rem", color:"rgba(247,244,239,0.55)", maxWidth:"38rem", lineHeight:1.8 }}>
+            Artisan, formateur et conférencier, Laurent de Boislorey intervient auprès des propriétaires, collectivités et professionnels du bâtiment.
           </p>
-        </AnimDiv>
-        <div className="resp-grid-3" style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.5rem", marginBottom:"4rem"}}>
-          {formats.map((f, i) => (
-            <AnimDiv key={i} delay={i * 120}>
-              <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "1rem", padding: "2.5rem 2rem", textAlign: "center", transition: "box-shadow 0.3s ease" }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 10px 30px rgba(61,54,46,0.1)"}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
-              >
-                <GoldIcon icon={f.icon} size="lg" />
-                <h3 style={{ fontFamily: serif, fontSize: "1.25rem", fontWeight: 600, color: C.dark, margin: "1rem 0 0.5rem" }}>{f.title}</h3>
-                <p style={{ fontFamily: body, color: C.mid, fontSize: "0.93rem", lineHeight: 1.7 }}>{f.desc}</p>
-              </div>
-            </AnimDiv>
-          ))}
         </div>
-        <AnimDiv>
-          <div style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: "1rem", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", marginBottom: "3rem", textAlign: "center" }}>
-            <Users size={40} style={{ color: C.goldDark }} />
-            <div>
-              <h3 style={{ fontFamily: serif, fontSize: "1.3rem", fontWeight: 600, color: C.dark, marginBottom: "0.5rem" }}>Interventions partout en France</h3>
-              <p style={{ fontFamily: body, color: C.mid, fontSize: "1rem", lineHeight: 1.7, maxWidth: "32rem", margin: "0 auto" }}>
-                Associations, collectivités, syndicats professionnels, salons du patrimoine — Laurent intervient sur demande pour des publics variés.
-              </p>
-            </div>
+      </section>
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"0", marginBottom:"4rem" }} className="resp-grid-2">
+            {themes.map((t, i) => (
+              <Reveal key={i} delay={i * 80}>
+                <div style={{ padding:"2.5rem", border:`1px solid ${C.border}`, borderTop: i<2?"":"none", borderRight: i%2===0?`1px solid ${C.border}`:"none", background:C.white }}>
+                  <div style={{ width:44, height:44, background:`${C.gold}14`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.25rem" }}>
+                    <t.icon size={20} style={{ color:C.gold }} aria-hidden="true" />
+                  </div>
+                  <h3 style={{ fontFamily:serif, fontSize:"1.15rem", fontWeight:600, color:C.dark, marginBottom:"0.5rem" }}>{t.title}</h3>
+                  <p style={{ fontFamily:body, fontSize:"0.875rem", color:C.stone, lineHeight:1.75 }}>{t.desc}</p>
+                </div>
+              </Reveal>
+            ))}
           </div>
-        </AnimDiv>
-        <CTABanner variant="dark" />
-      </div>
+          <CTABanner setPage={setPage} light />
+        </div>
+      </section>
     </div>
   );
 }
 
 // ─── Page: À Propos ───────────────────────────────────────────────────────────
-
 function AProposPage({ setPage }) {
+  const values = [
+    { n:"30", suffix:" ans", label:"d'expérience" },
+    { n:"500", suffix:"+",  label:"diagnostics réalisés" },
+    { n:"12",  suffix:"",   label:"régions d'intervention" },
+  ];
   return (
-    <div style={{ paddingTop: "6rem", paddingBottom: "4rem" }}>
-      <div style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 2rem" }}>
-        <SectionTitle title="À propos" subtitle="Laurent de Boislorey — Expert et maçon spécialisé." />
-        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"3rem", alignItems:"center", marginBottom:"4rem"}}>
-          <AnimDiv direction="left">
-            <div style={{ borderRadius: "1rem", overflow: "hidden", aspectRatio: "4/5", background: C.border }}>
-              <img
-                src={IMG_APROPOS}
-                alt="Laurent de Boislorey"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-          </AnimDiv>
-          <AnimDiv direction="right">
-            <h3 style={{ fontFamily: serif, fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 600, color: C.dark, marginBottom: "1rem" }}>
-              Laurent de Boislorey
-            </h3>
-            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "1.25rem", fontSize: "1.05rem" }}>
-              Expert et maçon spécialisé en techniques anciennes et écologiques.
-              <strong style={{ color: C.dark }}> 30 ans au service du patrimoine bâti.</strong>
-            </p>
-            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "1.25rem", fontSize: "1.05rem" }}>
-              Artisan, formateur, conférencier et président de Maisons Paysannes de France en Corrèze, Laurent accompagne propriétaires et professionnels dans la restauration respectueuse du bâti ancien.
-            </p>
-            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "2rem", fontSize: "1.05rem" }}>
-              Son approche repose sur le respect des matériaux anciens, l'optimisation budgétaire et la transmission du savoir-faire.
-            </p>
-            <div style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: "0.75rem", padding: "1.75rem" }}>
-              <Quote size={30} style={{ color: C.gold, marginBottom: "0.75rem" }} />
-              <blockquote style={{ fontFamily: serif, fontSize: "clamp(1.1rem, 2vw, 1.35rem)", color: C.dark, fontStyle: "italic", lineHeight: 1.6 }}>
-                "Faire bien, bon, beau, simple et durable."
-              </blockquote>
-            </div>
-          </AnimDiv>
+    <div style={{ paddingTop:"6rem", background:C.bg, minHeight:"100vh" }}>
+      <section style={{ background:C.dark, padding:"6rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <Tag>À propos</Tag>
+          <h1 style={{ fontFamily:serif, fontSize:"clamp(2rem, 5vw, 3.5rem)", fontWeight:600, color:C.white, lineHeight:1.15, marginBottom:"1.25rem" }}>
+            Laurent de Boislorey
+          </h1>
+          <GoldLine />
+          <p style={{ fontFamily:body, fontSize:"1rem", color:"rgba(247,244,239,0.55)", maxWidth:"36rem", lineHeight:1.8 }}>
+            Expert et maçon spécialisé en techniques anciennes et écologiques.
+          </p>
         </div>
-        <CTABanner />
-      </div>
+      </section>
+      <section style={{ padding:"5rem 2rem" }}>
+        <div style={{ maxWidth:"68rem", margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1.4fr", gap:"4rem", alignItems:"start", marginBottom:"4rem" }} className="resp-grid-contact">
+            <Reveal>
+              <div style={{ overflow:"hidden", aspectRatio:"4/5", background:C.surface }}>
+                <img src={IMG_APROPOS} alt="Laurent de Boislorey, expert en bâti ancien" loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+              </div>
+            </Reveal>
+            <Reveal delay={100}>
+              <Tag>Expert indépendant</Tag>
+              <h2 style={{ fontFamily:serif, fontSize:"clamp(1.5rem, 3vw, 2.2rem)", fontWeight:600, color:C.dark, marginBottom:"1rem", lineHeight:1.2 }}>
+                30 ans au service du patrimoine bâti
+              </h2>
+              <GoldLine />
+              <p style={{ fontFamily:body, color:C.stone, lineHeight:1.85, marginBottom:"1.25rem", fontSize:"0.95rem" }}>
+                Expert et maçon spécialisé en techniques anciennes et écologiques. <strong style={{ color:C.dark }}>30 ans au service du patrimoine bâti.</strong>
+              </p>
+              <p style={{ fontFamily:body, color:C.stone, lineHeight:1.85, marginBottom:"1.25rem", fontSize:"0.95rem" }}>
+                Artisan, formateur, conférencier et président de Maisons Paysannes de France en Corrèze, Laurent accompagne propriétaires et professionnels dans la restauration respectueuse du bâti ancien.
+              </p>
+              <p style={{ fontFamily:body, color:C.stone, lineHeight:1.85, marginBottom:"2rem", fontSize:"0.95rem" }}>
+                Son approche repose sur le respect des matériaux anciens, l'optimisation budgétaire et la transmission du savoir-faire.
+              </p>
+              {/* Chiffres */}
+              <div style={{ display:"flex", gap:"2rem", marginBottom:"2rem", flexWrap:"wrap" }}>
+                {values.map((v, i) => (
+                  <div key={i}>
+                    <p style={{ fontFamily:serif, fontSize:"2rem", fontWeight:600, color:C.gold, lineHeight:1 }}>{v.n}<span style={{ fontSize:"1.2rem" }}>{v.suffix}</span></p>
+                    <p style={{ fontFamily:body, fontSize:"0.8rem", color:C.stone }}>{v.label}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Citation */}
+              <div style={{ background:C.white, border:`1px solid ${C.border}`, borderLeft:`3px solid ${C.gold}`, padding:"1.5rem 2rem" }}>
+                <Quote size={22} style={{ color:`${C.gold}60`, marginBottom:"0.75rem" }} aria-hidden="true" />
+                <blockquote style={{ fontFamily:serif, fontSize:"clamp(1rem, 2vw, 1.2rem)", color:C.dark, fontStyle:"italic", lineHeight:1.6 }}>
+                  "Faire bien, bon, beau, simple et durable."
+                </blockquote>
+              </div>
+            </Reveal>
+          </div>
+          <CTABanner setPage={setPage} light />
+        </div>
+      </section>
     </div>
   );
 }
 
 // ─── Page: Contact ────────────────────────────────────────────────────────────
-
 function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", project_type: "", message: "" });
+  const [form, setForm] = useState({ name:"", email:"", phone:"", project_type:"", message:"" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -1754,143 +1065,115 @@ function ContactPage() {
     setSubmitted(true);
   };
 
-  const inp = {
-    width: "100%", padding: "0.75rem 1rem",
-    border: `1px solid ${C.border}`, background: C.cream,
-    fontFamily: body, fontSize: "0.95rem", color: C.dark,
-    outline: "none", transition: "border-color 0.2s, background 0.2s",
-    boxSizing: "border-box", borderRadius: "0",
-  };
+  const inp = { width:"100%", padding:"0.75rem 1rem", border:`1px solid ${C.border}`, background:C.bg, fontFamily:body, fontSize:"0.9rem", color:C.dark, outline:"none", transition:"border-color 0.2s", boxSizing:"border-box", borderRadius:"0" };
 
   return (
-    <div style={{ background: C.cream, paddingTop: "3.75rem", minHeight: "100vh" }}>
-      {/* Deux colonnes */}
-      <div className="resp-grid-contact" style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", minHeight: "calc(100vh - 3.75rem)" }}>
-
-        {/* Colonne gauche — sombre, info */}
-        <div style={{ background: C.dark, padding: "5rem 3rem", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-          {/* Orbe */}
-          <div style={{ position: "absolute", bottom: "-6rem", left: "-6rem", width: "24rem", height: "24rem", borderRadius: "50%", background: `radial-gradient(circle, ${C.gold}14 0%, transparent 70%)`, pointerEvents: "none" }} />
-
-          <AnimDiv direction="left">
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.gold, marginBottom: "1.5rem" }}>Contact</p>
-            <h1 style={{ fontFamily: serif, fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1rem" }}>
+    <div style={{ background:C.bg, paddingTop:"3.75rem", minHeight:"100vh" }}>
+      <div className="resp-grid-contact" style={{ display:"grid", gridTemplateColumns:"1fr 1.6fr", minHeight:"calc(100vh - 3.75rem)" }}>
+        {/* Gauche - sombre */}
+        <div style={{ background:C.dark, padding:"5rem 3rem", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden" }}>
+          <div style={{ position:"absolute", bottom:"-6rem", left:"-6rem", width:"24rem", height:"24rem", borderRadius:"50%", background:`radial-gradient(circle, ${C.gold}10 0%, transparent 70%)`, pointerEvents:"none" }} />
+          <div style={{ position:"relative", zIndex:1 }}>
+            <Tag>Contact</Tag>
+            <h1 style={{ fontFamily:serif, fontSize:"clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight:600, color:C.white, lineHeight:1.2, marginBottom:"1rem" }}>
               Parlons de votre projet.
             </h1>
-            <p style={{ fontFamily: body, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.75, marginBottom: "3rem" }}>
-              Un premier échange sans engagement pour évaluer vos besoins et définir la meilleure approche.
+            <GoldLine />
+            <p style={{ fontFamily:body, fontSize:"0.9rem", color:"rgba(247,244,239,0.5)", lineHeight:1.8, marginBottom:"3rem" }}>
+              Un premier échange gratuit et sans engagement pour évaluer vos besoins et définir la meilleure approche.
             </p>
-
-            {/* Coordonnées */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <div style={{ display:"flex", flexDirection:"column", gap:"1.5rem" }}>
               {[
-                { icon: Phone, label: "Téléphone", value: "+33 6 77 45 44 38", action: () => window.open("tel:+33677454438") },
-                { icon: Mail, label: "Email", value: "optimaexpertise46@gmail.com", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
-                { icon: MessageCircle, label: "WhatsApp", value: "Discuter maintenant", action: () => window.open("https://wa.me/33677454438") },
-                { icon: MapPin, label: "Zone d'intervention", value: "Partout en France", action: null },
+                { icon:Phone,          label:"Téléphone",           value:"+33 6 77 45 44 38",            action:() => window.open("tel:+33677454438") },
+                { icon:Mail,           label:"Email",               value:"optimaexpertise46@gmail.com",   action:() => window.open("mailto:optimaexpertise46@gmail.com") },
+                { icon:MessageCircle,  label:"WhatsApp",            value:"Discuter maintenant",           action:() => window.open("https://wa.me/33677454438") },
+                { icon:MapPin,         label:"Zone d'intervention", value:"Partout en France",             action:null },
               ].map((c, i) => (
-                <div
-                  key={i}
-                  onClick={c.action}
-                  style={{ display: "flex", alignItems: "center", gap: "1rem", cursor: c.action ? "pointer" : "default" }}
-                >
-                  <div style={{ width: 36, height: 36, borderRadius: "0.35rem", background: `${C.gold}18`, border: `1px solid ${C.gold}25`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <c.icon size={15} style={{ color: C.gold }} />
+                <div key={i} onClick={c.action} style={{ display:"flex", alignItems:"center", gap:"1rem", cursor:c.action?"pointer":"default" }}>
+                  <div style={{ width:34, height:34, background:`${C.gold}18`, border:`1px solid ${C.gold}25`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <c.icon size={14} style={{ color:C.gold }} aria-hidden="true" />
                   </div>
                   <div>
-                    <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.58rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", marginBottom: "0.1rem" }}>{c.label}</p>
-                    <p style={{ fontFamily: body, fontSize: "0.875rem", color: c.action ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.55)", fontWeight: c.action ? 500 : 400 }}>{c.value}</p>
+                    <p style={{ fontFamily:mono, fontSize:"0.56rem", textTransform:"uppercase", letterSpacing:"0.1em", color:"rgba(247,244,239,0.3)", marginBottom:"0.1rem" }}>{c.label}</p>
+                    <p style={{ fontFamily:body, fontSize:"0.875rem", color:c.action?"rgba(247,244,239,0.85)":"rgba(247,244,239,0.5)", fontWeight:c.action?500:400 }}>{c.value}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </AnimDiv>
+          </div>
         </div>
 
-        {/* Colonne droite — formulaire */}
-        <div style={{ padding: "5rem 3.5rem", display: "flex", alignItems: "center", background: C.white }}>
-          <div style={{ width: "100%", maxWidth: "480px", margin: "0 auto" }}>
-            <AnimDiv direction="right">
-              {submitted ? (
-                <div style={{ textAlign: "center", padding: "3rem 0" }}>
-                  <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(34,197,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
-                    <CheckCircle size={32} style={{ color: "#22c55e" }} />
-                  </div>
-                  <h3 style={{ fontFamily: serif, fontSize: "1.6rem", color: C.dark, marginBottom: "0.75rem" }}>Message envoyé !</h3>
-                  <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.7 }}>Laurent vous contactera dans les 24h pour discuter de votre projet.</p>
+        {/* Droite - formulaire */}
+        <div style={{ padding:"5rem 3.5rem", display:"flex", alignItems:"center", background:C.white }}>
+          <div style={{ width:"100%", maxWidth:"480px", margin:"0 auto" }}>
+            {submitted ? (
+              <div style={{ textAlign:"center", padding:"3rem 0" }}>
+                <div style={{ width:60, height:60, background:"rgba(34,197,94,0.1)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 1.5rem" }}>
+                  <CheckCircle size={28} style={{ color:"#22c55e" }} aria-hidden="true" />
                 </div>
-              ) : (
-                <>
-                  <h2 style={{ fontFamily: serif, fontSize: "1.5rem", fontWeight: 700, color: C.dark, marginBottom: "0.4rem" }}>Votre message</h2>
-                  <p style={{ fontFamily: body, fontSize: "0.875rem", color: C.mid, marginBottom: "2rem" }}>Remplissez le formulaire, nous répondons sous 24h.</p>
-
-                  <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                      <div>
-                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Nom *</label>
-                        <input required style={inp} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Jean Dupont"
-                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
-                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Email *</label>
-                        <input required type="email" style={inp} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="jean@exemple.fr"
-                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
-                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                      <div>
-                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Téléphone</label>
-                        <input style={inp} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+33 6 77 45 44 38"
-                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
-                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Type de projet</label>
-                        <select style={{ ...inp, appearance: "none" }} value={form.project_type} onChange={e => setForm({ ...form, project_type: e.target.value })}
-                          onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
-                          onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
-                        >
-                          <option value="">Choisir…</option>
-                          <option value="maison_ancienne">Maison ancienne</option>
-                          <option value="chateau">Château</option>
-                          <option value="moulin">Moulin</option>
-                          <option value="manoir">Manoir</option>
-                          <option value="autre">Autre</option>
-                        </select>
-                      </div>
-                    </div>
-
+                <h3 style={{ fontFamily:serif, fontSize:"1.6rem", color:C.dark, marginBottom:"0.75rem" }}>Message envoyé !</h3>
+                <p style={{ fontFamily:body, color:C.stone, lineHeight:1.75 }}>Laurent vous contactera dans les 24h pour discuter de votre projet.</p>
+              </div>
+            ) : (
+              <>
+                <Tag>Votre message</Tag>
+                <h2 style={{ fontFamily:serif, fontSize:"1.6rem", fontWeight:600, color:C.dark, marginBottom:"0.4rem" }}>Décrivez votre projet</h2>
+                <p style={{ fontFamily:body, fontSize:"0.85rem", color:C.stone, marginBottom:"2rem" }}>Nous répondons sous 24h.</p>
+                <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"1rem" }}>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.75rem" }}>
                     <div>
-                      <label style={{ display: "block", fontFamily: body, fontSize: "0.75rem", color: C.mid, marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Message *</label>
-                      <textarea required rows={5} style={{ ...inp, resize: "vertical" }} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Décrivez votre projet, vos questions…"
-                        onFocus={e => { e.target.style.borderColor = C.goldDark; e.target.style.background = C.white; }}
-                        onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = C.cream; }}
+                      <label style={{ display:"block", fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.stone, marginBottom:"0.35rem" }}>Nom *</label>
+                      <input required style={inp} value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="Jean Dupont"
+                        onFocus={e => e.target.style.borderColor=C.gold}
+                        onBlur={e => e.target.style.borderColor=C.border}
                       />
                     </div>
-
-                    <button type="submit" disabled={loading} style={{
-                      padding: "0.9rem 1.5rem", border: "none", cursor: "pointer",
-                      background: C.dark, color: C.white,
-                      fontFamily: body, fontSize: "0.9rem", fontWeight: 600,
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                      opacity: loading ? 0.7 : 1, transition: "opacity 0.18s",
-                    }}
-                      onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.85"; }}
-                      onMouseLeave={e => e.currentTarget.style.opacity = loading ? "0.7" : "1"}
-                    >
-                      <Send size={14} />
-                      {loading ? "Envoi en cours…" : "Envoyer le message"}
-                    </button>
-                  </form>
-                </>
-              )}
-            </AnimDiv>
+                    <div>
+                      <label style={{ display:"block", fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.stone, marginBottom:"0.35rem" }}>Email *</label>
+                      <input required type="email" style={inp} value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="jean@exemple.fr"
+                        onFocus={e => e.target.style.borderColor=C.gold}
+                        onBlur={e => e.target.style.borderColor=C.border}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.75rem" }}>
+                    <div>
+                      <label style={{ display:"block", fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.stone, marginBottom:"0.35rem" }}>Téléphone</label>
+                      <input style={inp} value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} placeholder="+33 6 XX XX XX XX"
+                        onFocus={e => e.target.style.borderColor=C.gold}
+                        onBlur={e => e.target.style.borderColor=C.border}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display:"block", fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.stone, marginBottom:"0.35rem" }}>Type de projet</label>
+                      <select style={{...inp}} value={form.project_type} onChange={e => setForm({...form, project_type:e.target.value})}
+                        onFocus={e => e.target.style.borderColor=C.gold}
+                        onBlur={e => e.target.style.borderColor=C.border}
+                      >
+                        <option value="">Choisir...</option>
+                        <option value="maison">Maison ancienne</option>
+                        <option value="chateau">Château / grande demeure</option>
+                        <option value="moulin">Moulin / bâtiment rural</option>
+                        <option value="autre">Autre</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display:"block", fontFamily:mono, fontSize:"0.58rem", textTransform:"uppercase", letterSpacing:"0.1em", color:C.stone, marginBottom:"0.35rem" }}>Message *</label>
+                    <textarea required style={{...inp, resize:"vertical", minHeight:"120px"}} value={form.message} onChange={e => setForm({...form, message:e.target.value})} placeholder="Décrivez votre projet, vos questions et vos besoins..."
+                      onFocus={e => e.target.style.borderColor=C.gold}
+                      onBlur={e => e.target.style.borderColor=C.border}
+                    />
+                  </div>
+                  <button type="submit" disabled={loading} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem", padding:"0.9rem 2rem", background:loading?C.stone:C.gold, border:"none", cursor:loading?"not-allowed":"pointer", fontFamily:body, fontSize:"0.95rem", fontWeight:500, color:C.white, transition:"opacity 0.2s", marginTop:"0.5rem" }}
+                    onMouseEnter={e => !loading && (e.currentTarget.style.opacity="0.82")}
+                    onMouseLeave={e => e.currentTarget.style.opacity="1"}
+                  >
+                    <Send size={15} aria-hidden="true" /> {loading ? "Envoi en cours..." : "Envoyer le message"}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1899,86 +1182,53 @@ function ContactPage() {
 }
 
 // ─── App Shell ────────────────────────────────────────────────────────────────
-
 export default function App() {
-  const [currentPage, setCurrentPage] = useState("home");
+  const [page, setPage] = useState("home");
 
-  const setPage = (page) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  useEffect(() => { window.scrollTo({ top:0, behavior:"smooth" }); }, [page]);
 
   const pages = {
-    home: <HomePage setPage={setPage} />,
-    erreurs: <ErreursPage setPage={setPage} />,
-    methode: <MethodePage setPage={setPage} />,
-    tarifs: <TarifsPage setPage={setPage} />,
-    chateaux: <ChateauxPage setPage={setPage} />,
-    projets: <ProjetsPage setPage={setPage} />,
+    home:        <HomePage        setPage={setPage} />,
+    erreurs:     <ErreursPage     setPage={setPage} />,
+    methode:     <MethodePage     setPage={setPage} />,
+    tarifs:      <TarifsPage      setPage={setPage} />,
+    chateaux:    <ChateauxPage    setPage={setPage} />,
+    projets:     <ProjetsPage     setPage={setPage} />,
     conferences: <ConferencesPage setPage={setPage} />,
-    apropos: <AProposPage setPage={setPage} />,
-    contact: <ContactPage />,
+    apropos:     <AProposPage     setPage={setPage} />,
+    contact:     <ContactPage />,
   };
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@300;400;500&family=DM+Mono:wght@400&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #faf9f7; }
-        .hidden { display: none; }
-        @media (min-width: 1024px) { .hidden.lg\\:flex { display: flex !important; } .hidden.lg\\:block { display: block !important; } }
-        .space-y-4 > * + * { margin-top: 1rem; }
-        .grid { display: grid; }
-        .grid.md\:grid-cols-2 { grid-template-columns: repeat(1, 1fr); }
-        .grid.md\:grid-cols-3 { grid-template-columns: repeat(1, 1fr); }
-        .grid.md\:grid-cols-5 { grid-template-columns: repeat(1, 1fr); }
-        .grid.sm\:grid-cols-2 { grid-template-columns: repeat(1, 1fr); }
-        .grid.sm\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
-        .grid.lg\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
-        @media (min-width: 640px) {
-          .grid.sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-          .grid.sm\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+        html { scroll-behavior: smooth; }
+        body { background: #F7F4EF; color: #1A1612; -webkit-font-smoothing: antialiased; }
+        button, input, select, textarea { font-family: inherit; }
+        img { display: block; max-width: 100%; }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
-        @media (min-width: 768px) {
-          .grid.md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-          .grid.md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-          .grid.md\:grid-cols-5 { grid-template-columns: 2fr 3fr; }
-          .md\:col-span-3 { grid-column: span 3; }
-        }
+        .hidden { display: none !important; }
         @media (min-width: 1024px) {
-          .grid.lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-          .hidden.lg\:flex { display: flex !important; }
-          .hidden.lg\:block { display: block !important; }
-          .lg\:hidden { display: none !important; }
+          .hidden.lg\\:flex { display: flex !important; }
+          .lg\\:hidden { display: none !important; }
         }
-        .items-center { align-items: center; }
-        .items-start { align-items: flex-start; }
-        .justify-center { justify-content: center; }
-        .gap-1 { gap: 0.25rem; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .gap-5 { gap: 1.25rem; } .gap-6 { gap: 1.5rem; } .gap-8 { gap: 2rem; } .gap-12 { gap: 3rem; }
-        .flex { display: flex; } .flex-col { flex-direction: column; } .flex-wrap { flex-wrap: wrap; }
-        .text-center { text-align: center; }
-        .w-full { width: 100%; }
-        .h-full { height: 100%; }
-        .overflow-hidden { overflow: hidden; }
-        .relative { position: relative; }
-        .absolute { position: absolute; }
-        select option { background: white; color: #3d362e; }
         @media (max-width: 767px) {
-          .resp-grid-2 { grid-template-columns: repeat(1,1fr) !important; }
-          .resp-grid-3 { grid-template-columns: repeat(1,1fr) !important; }
-          .resp-grid-contact { grid-template-columns: repeat(1,1fr) !important; }
-          .resp-grid-4 { grid-template-columns: repeat(2,1fr) !important; }
+          .resp-grid-2     { grid-template-columns: 1fr !important; }
+          .resp-grid-3     { grid-template-columns: 1fr !important; }
+          .resp-grid-4     { grid-template-columns: repeat(2,1fr) !important; }
+          .resp-grid-contact { grid-template-columns: 1fr !important; }
         }
-        section + section { margin-top: 0; }
-        .section-gap { margin-bottom: 4rem; }
         @media (max-width: 480px) {
-          .resp-grid-4 { grid-template-columns: repeat(1,1fr) !important; }
+          .resp-grid-4 { grid-template-columns: 1fr !important; }
         }
       `}</style>
-      <div style={{ minHeight: "100vh", background: C.cream, fontFamily: body }}>
-        <Navbar currentPage={currentPage} setPage={setPage} />
-        <main>{pages[currentPage]}</main>
+      <div style={{ minHeight:"100vh", background:"#F7F4EF", fontFamily:"'Jost', 'Helvetica Neue', sans-serif" }}>
+        <Navbar current={page} setPage={setPage} />
+        <main>{pages[page] || <HomePage setPage={setPage} />}</main>
         <Footer setPage={setPage} />
       </div>
     </>

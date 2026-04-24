@@ -9,7 +9,7 @@ import {
   Wallet, ListChecks, Search, ClipboardList, HardHat, Award,
   Users, Landmark, BookOpen, Hammer, Mic, Calendar, Eye,
   FileText, ClipboardCheck, Home, MapPin, Send, CheckCircle,
-  Menu, Star
+  Menu, Star, Leaf, Layers
 } from "lucide-react";
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -134,6 +134,7 @@ function CTABanner({ variant = "default", setPage }) {
       ref={ref}
       style={{
         background: isDark ? C.dark : C.creamMid,
+      backgroundImage: isDark ? `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.015' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")` : `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236b5a4e' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
         borderTop: isDark ? "none" : `1px solid ${C.border}`,
         borderBottom: isDark ? "none" : `1px solid ${C.border}`,
         opacity: inView ? 1 : 0,
@@ -147,7 +148,7 @@ function CTABanner({ variant = "default", setPage }) {
         Parlons de votre projet
       </h3>
       <p style={{ fontFamily: body, color: isDark ? "rgba(255,255,255,0.65)" : C.mid, marginBottom: "1.75rem", maxWidth: "26rem", margin: "0 auto 1.75rem", fontSize: "0.95rem", lineHeight: 1.7 }}>
-        Un premier échange sans engagement pour évaluer vos besoins.
+        Un premier échange gratuit et sans engagement pour évaluer vos besoins et définir la meilleure approche.
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", justifyContent: "center", alignItems: "center" }}>
         {btns.map((btn, i) => (
@@ -453,9 +454,33 @@ function Footer({ setPage }) {
           </div>
         </div>
         <div style={{ height: "1px", background: "rgba(255,255,255,0.1)", margin: "0 0 1.5rem" }} />
-        <p style={{ textAlign: "center", fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", fontFamily: body }}>
-          © {new Date().getFullYear()} Laurent de Boislorey — Tous droits réservés.
-        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+          <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", fontFamily: body }}>
+            © {new Date().getFullYear()} Laurent de Boislorey - Tous droits réservés.
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+            <a href="https://www.linkedin.com/in/laurent-de-boislorey" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Laurent de Boislorey" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.4rem", fontFamily: body, fontSize: "0.8rem", transition: "color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn
+            </a>
+            <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "0.8rem" }}>|</span>
+            <button onClick={() => {}} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", fontFamily: body, fontSize: "0.8rem", padding: 0, transition: "color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+            >
+              Mentions légales
+            </button>
+            <button onClick={() => {}} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", fontFamily: body, fontSize: "0.8rem", padding: 0, transition: "color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+            >
+              Confidentialité
+            </button>
+          </div>
+        </div>
       </div>
     </footer>
   );
@@ -463,142 +488,275 @@ function Footer({ setPage }) {
 
 // ─── Page: Home ───────────────────────────────────────────────────────────────
 
+const HERO_SLIDES = [
+  {
+    url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80&fit=crop",
+    alt: "Château français en pierre en cours de restauration — patrimoine bâti ancien",
+    label: "Châteaux & grandes demeures",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1600&q=80&fit=crop",
+    alt: "Maison ancienne en pierre typique du patrimoine rural français",
+    label: "Maisons paysannes en pierre",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1600&q=80&fit=crop",
+    alt: "Moulin ancien restauré avec soin dans le respect des matériaux d'origine",
+    label: "Moulins & bâtiments ruraux",
+  },
+];
+
 function HeroSection({ setPage }) {
   const [visible, setVisible] = useState(false);
-  const [bounce, setBounce] = useState(0);
+  const [bounce, setBounce] = useState(false);
+  const [slideIdx, setSlideIdx] = useState(0);
+  const [popupOpen, setPopupOpen] = useState(false);
+
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
-    const iv = setInterval(() => setBounce(b => b + 1), 1000);
-    return () => clearInterval(iv);
+    const iv = setInterval(() => setBounce(b => !b), 1000);
+    const si = setInterval(() => setSlideIdx(i => (i + 1) % HERO_SLIDES.length), 5000);
+    return () => { clearInterval(iv); clearInterval(si); };
   }, []);
 
+  const heroButtons = [
+    { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438"), ariaLabel: "Appeler Laurent de Boislorey au +33 6 77 45 44 38" },
+    { icon: Mail, label: "Demander un devis", action: () => setPage ? setPage("contact") : window.open("mailto:optimaexpertise46@gmail.com"), ariaLabel: "Envoyer un e-mail pour demander un devis" },
+    { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438"), ariaLabel: "Contacter par WhatsApp" },
+  ];
+
   return (
-    <section style={{ position: "relative", minHeight: "92vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
-      <div style={{
-        position: "absolute", inset: 0,
-        backgroundImage: `url(${IMG_HERO})`,
-        backgroundSize: "cover", backgroundPosition: "center",
-      }} />
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(2,6,23,0.88) 0%, rgba(15,23,42,0.75) 60%, rgba(42,37,31,0.65) 100%)" }} />
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 10% 30%, rgba(196,163,90,0.1) 0%, transparent 70%)" }} />
-
-      <div style={{ position: "relative", zIndex: 10, maxWidth: "72rem", margin: "0 auto", padding: "5rem 2rem" }}>
-        <div style={{
-          maxWidth: "48rem",
-          opacity: visible ? 1 : 0,
-          transform: visible ? "none" : "translateY(30px)",
-          transition: "opacity 0.9s ease, transform 0.9s ease",
-        }}>
-          <div style={{
-            display: "inline-block",
-            background: `${C.gold}22`, border: `1px solid ${C.gold}55`,
-            borderRadius: "999px", padding: "0.35rem 1rem", marginBottom: "1.5rem",
-          }}>
-            <span style={{ fontFamily: body, color: C.gold, fontSize: "0.85rem", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-              30 ans d'expérience
-            </span>
+    <>
+      {/* Popup explication 40 % */}
+      {popupOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Comment économiser jusqu'à 40 % sur votre restauration"
+          onClick={() => setPopupOpen(false)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: C.white, borderRadius: "1rem", padding: "2.5rem", maxWidth: "480px", width: "100%", position: "relative" }}
+          >
+            <button
+              onClick={() => setPopupOpen(false)}
+              aria-label="Fermer la popup"
+              style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", cursor: "pointer", color: C.mid, fontSize: "1.25rem", lineHeight: 1 }}
+            >✕</button>
+            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.goldDark, marginBottom: "1rem" }}>Comment économiser jusqu'à 40 % ?</p>
+            <h3 style={{ fontFamily: serif, fontSize: "1.4rem", fontWeight: 700, color: C.dark, marginBottom: "1rem", lineHeight: 1.3 }}>Un diagnostic expert évite les erreurs coûteuses</h3>
+            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "1rem" }}>
+              En bâti ancien, les interventions inadaptées — ciment sur des murs en pierre, isolation intérieure qui bloque la respiration des murs, traitements d'humidité mal diagnostiqués — génèrent des surcoûts importants et des dégradations parfois irréversibles.
+            </p>
+            <p style={{ fontFamily: body, color: C.mid, lineHeight: 1.75, marginBottom: "1.5rem" }}>
+              Un accompagnement expert dès le départ permet d'éviter ces erreurs, de prioriser les travaux utiles et d'économiser en moyenne <strong style={{ color: C.dark }}>20 à 40 % du budget travaux</strong> par rapport à une approche non spécialisée.
+            </p>
+            <button
+              onClick={() => { setPopupOpen(false); setPage && setPage("contact"); }}
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.8rem 1.75rem", background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", borderRadius: "0.35rem", fontFamily: body, fontSize: "0.95rem", fontWeight: 600, color: C.white, cursor: "pointer" }}
+            >
+              <Mail size={15} /> Demander un diagnostic
+            </button>
           </div>
+        </div>
+      )}
 
-          <h1 style={{ fontFamily: serif, fontSize: "clamp(2.4rem, 5.5vw, 4rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1.5rem" }}>
-            Expert indépendant<br />
-            <span style={{ color: C.gold }}>du bâti ancien</span>
-          </h1>
+      <section style={{ position: "relative", minHeight: "92vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
+        {/* Slider images */}
+        {HERO_SLIDES.map((slide, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute", inset: 0,
+              backgroundImage: `url(${slide.url})`,
+              backgroundSize: "cover", backgroundPosition: "center",
+              opacity: i === slideIdx ? 1 : 0,
+              transition: "opacity 1.2s ease",
+            }}
+            role="img"
+            aria-label={slide.alt}
+          />
+        ))}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(2,6,23,0.88) 0%, rgba(15,23,42,0.75) 60%, rgba(42,37,31,0.65) 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 10% 30%, rgba(196,163,90,0.1) 0%, transparent 70%)" }} />
 
-          <p style={{ fontFamily: body, fontSize: "clamp(1.15rem, 2.5vw, 1.45rem)", color: "rgba(255,255,255,0.92)", fontWeight: 300, marginBottom: "1rem" }}>
-            Économisez jusqu'à <span style={{ color: C.gold, fontWeight: 600 }}>40 %</span> sur vos travaux de restauration.
-          </p>
-
-          <p style={{ fontFamily: body, fontSize: "1.05rem", color: "rgba(214,211,209,0.85)", maxWidth: "36rem", marginBottom: "1rem", lineHeight: 1.7 }}>
-            30 ans d'expérience au service des maisons anciennes, châteaux, moulins et bâtiments historiques.
-          </p>
-
-          <Divider align="left" />
-
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1.5rem" }}>
-            {[
-              { icon: Phone, label: "Appeler maintenant", action: () => window.open("tel:+33677454438"), primary: true },
-              { icon: Mail, label: "Demander un devis", action: () => window.open("mailto:optimaexpertise46@gmail.com") },
-              { icon: MessageCircle, label: "WhatsApp", action: () => window.open("https://wa.me/33677454438") },
-            ].map((btn, i) => (
+        {/* Slide label */}
+        <div style={{ position: "absolute", bottom: "4rem", right: "2rem", zIndex: 10 }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.45)" }}>
+            {HERO_SLIDES[slideIdx].label}
+          </span>
+          <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.5rem", justifyContent: "flex-end" }}>
+            {HERO_SLIDES.map((_, i) => (
               <button
                 key={i}
-                onClick={btn.action}
-                style={{
-                  display: "flex", alignItems: "center", gap: "0.5rem",
-                  padding: "0.85rem 1.75rem", borderRadius: "0.75rem",
-                  fontFamily: body, fontSize: "1rem", fontWeight: 500,
-                  cursor: "pointer", transition: "all 0.2s ease",
-                  background: btn.primary ? `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})` : "rgba(255,255,255,0.07)",
-                  color: C.white,
-                  border: btn.primary ? "none" : "1px solid rgba(255,255,255,0.25)",
-                  backdropFilter: btn.primary ? "none" : "blur(8px)",
-                  boxShadow: btn.primary ? `0 10px 28px ${C.gold}44` : "none",
-                }}
-                onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-              >
-                <btn.icon size={17} />{btn.label}
-              </button>
+                onClick={() => setSlideIdx(i)}
+                aria-label={`Image ${i + 1} : ${HERO_SLIDES[i].label}`}
+                style={{ width: i === slideIdx ? 24 : 8, height: 8, borderRadius: 4, background: i === slideIdx ? C.gold : "rgba(255,255,255,0.3)", border: "none", cursor: "pointer", padding: 0, transition: "width 0.3s ease, background 0.3s ease" }}
+              />
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div style={{
-        position: "absolute", bottom: "2rem", left: "50%",
-        transform: `translateX(-50%) translateY(${bounce % 2 === 0 ? 0 : 8}px)`,
-        transition: "transform 0.9s ease",
-        color: "rgba(255,255,255,0.35)",
-      }}>
-        <ChevronDown size={24} />
-      </div>
-    </section>
+        <div style={{ position: "relative", zIndex: 10, maxWidth: "72rem", margin: "0 auto", padding: "5rem 2rem" }}>
+          <div style={{
+            maxWidth: "48rem",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "none" : "translateY(30px)",
+            transition: "opacity 0.9s ease, transform 0.9s ease",
+          }}>
+            <div style={{ display: "inline-block", background: `${C.gold}22`, border: `1px solid ${C.gold}55`, borderRadius: "999px", padding: "0.35rem 1rem", marginBottom: "1.5rem" }}>
+              <span style={{ fontFamily: body, color: C.gold, fontSize: "0.85rem", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                30 ans d'expérience
+              </span>
+            </div>
+
+            <h1 style={{ fontFamily: serif, fontSize: "clamp(2.4rem, 5.5vw, 4rem)", fontWeight: 700, color: C.white, lineHeight: 1.2, marginBottom: "1.5rem" }}>
+              Expert indépendant<br />
+              <span style={{ color: C.gold }}>du bâti ancien</span>
+            </h1>
+
+            <p style={{ fontFamily: body, fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)", color: "rgba(255,255,255,0.92)", fontWeight: 300, marginBottom: "0.4rem" }}>
+              Préservez votre patrimoine et optimisez votre budget.{" "}
+              <button
+                onClick={() => setPopupOpen(true)}
+                aria-label="Comprendre comment économiser jusqu'à 40 % sur vos travaux"
+                style={{ background: "none", border: "none", cursor: "pointer", color: C.gold, fontFamily: body, fontSize: "inherit", fontWeight: 500, textDecoration: "underline", textUnderlineOffset: "3px", padding: 0 }}
+              >
+                Comment ?*
+              </button>
+            </p>
+
+            <p style={{ fontFamily: body, fontSize: "0.95rem", color: "rgba(214,211,209,0.75)", marginBottom: "1.25rem", fontStyle: "italic" }}>
+              * Économies constatées de 20 à 40 % grâce à un diagnostic expert préalable.
+            </p>
+
+            <p style={{ fontFamily: body, fontSize: "1.05rem", color: "rgba(214,211,209,0.85)", maxWidth: "36rem", marginBottom: "1rem", lineHeight: 1.7, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ color: C.gold }}>✦</span> 30 ans d'expérience à vos côtés pour les maisons anciennes, châteaux et moulins.
+            </p>
+
+            <Divider align="left" />
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1.5rem" }}>
+              {heroButtons.map((btn, i) => (
+                <button
+                  key={i}
+                  onClick={btn.action}
+                  aria-label={btn.ariaLabel}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.85rem 1.75rem", borderRadius: "0.35rem",
+                    fontFamily: body, fontSize: "0.95rem", fontWeight: 600,
+                    cursor: "pointer", transition: "opacity 0.2s ease",
+                    background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`,
+                    color: C.white,
+                    border: `2px solid ${C.gold}`,
+                    boxShadow: `0 6px 20px ${C.gold}40`,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                >
+                  <btn.icon size={17} aria-hidden="true" />{btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div style={{
+          position: "absolute", bottom: "2rem", left: "50%",
+          transform: `translateX(-50%) translateY(${bounce ? 0 : 8}px)`,
+          transition: "transform 0.9s ease",
+          color: "rgba(255,255,255,0.35)",
+        }}>
+          <ChevronDown size={24} aria-hidden="true" />
+        </div>
+      </section>
+    </>
   );
 }
 
 function ProblemSection() {
+  const [openCard, setOpenCard] = useState(null);
   const problems = [
-    "Confusion entre logique du bâti ancien et moderne",
-    "Utilisation de matériaux inadaptés",
-    "Travaux inutiles ou excessifs",
-    "Mauvais diagnostic de l'humidité",
+    {
+      icon: AlertTriangle,
+      title: "Confusion bâti ancien et bâti moderne",
+      short: "Les règles du neuf ne s'appliquent pas à l'ancien.",
+      detail: "Un bâtiment ancien fonctionne selon une logique de respirabilité et d'inertie. Appliquer les normes du bâti moderne — isolation synthétique, béton, membranes étanches — conduit à piéger l'humidité dans les murs et à dégrader la structure sur le long terme.",
+    },
+    {
+      icon: Hammer,
+      title: "Travaux inutiles ou excessifs",
+      short: "Des interventions mal ciblées qui gonflent la facture.",
+      detail: "Sans diagnostic préalable, les artisans traitent souvent les symptômes plutôt que les causes. On refait une façade sans traiter le pied de mur, on isole sans résoudre l'humidité, on remplace des éléments encore sains. Résultat : des dépenses inutiles et des travaux à refaire.",
+    },
+    {
+      icon: Layers,
+      title: "Utilisation de matériaux inadaptés",
+      short: "Le ciment, le plâtre synthétique et la laine de verre abîment l'ancien.",
+      detail: "Le bâti ancien exige des matériaux naturels et perspirants : chaux aérienne, enduits de terre, chanvre, pierre. L'emploi de matériaux modernes imperméables crée des désordres : condensation, sels, efflorescence, décollement des enduits et dégradation accélérée.",
+    },
+    {
+      icon: Droplets,
+      title: "Diagnostic d'humidité insuffisant",
+      short: "L'humidité mal diagnostiquée génère des erreurs coûteuses.",
+      detail: "Il existe plusieurs types d'humidité (remontées capillaires, condensation, infiltrations, humidité de construction) avec des traitements radicalement différents. Un mauvais diagnostic conduit à des traitements inefficaces, voire aggravants — parfois pour des dizaines de milliers d'euros.",
+    },
   ];
   return (
     <section style={{ padding: "5rem 2rem", background: C.white }}>
       <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
         <SectionTitle
-          title="Restaurer une maison ancienne ne s'improvise pas."
+          title="La restauration d'un bâti ancien exige une méthode adaptée."
           subtitle="La majorité des surcoûts viennent d'erreurs de méthode :"
         />
-        <div style={{display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"1rem", marginBottom:"3rem", maxWidth:"100%"}}>
-          {problems.map((p, i) => (
-            <AnimDiv key={i} delay={i * 100} direction="left">
-              <div style={{
-                display: "flex", alignItems: "flex-start", gap: "1rem",
-                padding: "1.25rem 1.5rem",
-                borderRadius: "0",
-                borderLeft: "3px solid #f87171",
-                background: "rgba(254,242,242,0.5)",
-                border: "1px solid rgba(252,165,165,0.3)",
-                borderLeftWidth: "3px",
-                borderLeftColor: "#f87171",
-              }}>
-                <X size={18} style={{ color: "#f87171", flexShrink: 0, marginTop: "2px" }} />
-                <p style={{ fontFamily: body, color: C.darkMid, fontSize: "1rem", lineHeight: 1.6 }}>{p}</p>
-              </div>
-            </AnimDiv>
-          ))}
+        <div className="resp-grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "1rem", marginBottom: "3rem" }}>
+          {problems.map((p, i) => {
+            const isOpen = openCard === i;
+            return (
+              <AnimDiv key={i} delay={i * 100}>
+                <div
+                  style={{
+                    borderLeft: "3px solid #f87171",
+                    background: isOpen ? "rgba(254,242,242,0.8)" : "rgba(254,242,242,0.4)",
+                    border: "1px solid rgba(252,165,165,0.3)",
+                    borderLeftWidth: "3px",
+                    borderLeftColor: "#f87171",
+                    padding: "1.5rem",
+                    cursor: "pointer",
+                    transition: "background 0.25s ease",
+                  }}
+                  onClick={() => setOpenCard(isOpen ? null : i)}
+                  role="button"
+                  aria-expanded={isOpen}
+                  tabIndex={0}
+                  onKeyDown={e => e.key === "Enter" && setOpenCard(isOpen ? null : i)}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+                    <p.icon size={20} style={{ color: "#f87171", flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: body, color: C.dark, fontSize: "1rem", fontWeight: 600, lineHeight: 1.4, marginBottom: "0.3rem" }}>{p.title}</p>
+                      <p style={{ fontFamily: body, color: C.mid, fontSize: "0.88rem", lineHeight: 1.55 }}>{p.short}</p>
+                      {isOpen && (
+                        <p style={{ fontFamily: body, color: C.darkMid, fontSize: "0.88rem", lineHeight: 1.7, marginTop: "0.75rem", borderTop: "1px solid rgba(252,165,165,0.3)", paddingTop: "0.75rem" }}>{p.detail}</p>
+                      )}
+                    </div>
+                    <span style={{ color: "#f87171", fontSize: "0.9rem", flexShrink: 0, marginTop: "2px" }}>{isOpen ? "▲" : "▼"}</span>
+                  </div>
+                </div>
+              </AnimDiv>
+            );
+          })}
         </div>
         <AnimDiv>
-          <div style={{
-            background: C.dark, borderRadius: "1rem",
-            padding: "2.5rem 3rem", textAlign: "center",
-          }}>
-            <AlertTriangle size={32} style={{ color: C.gold, margin: "0 auto 1rem" }} />
+          <div style={{ background: C.dark, padding: "2.5rem 3rem", textAlign: "center" }}>
+            <Shield size={32} style={{ color: C.gold, margin: "0 auto 1rem" }} aria-hidden="true" />
             <p style={{ fontFamily: serif, fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)", color: C.white, lineHeight: 1.6 }}>
-              Résultat : des dizaines de milliers d'euros dépensés{" "}
-              <span style={{ color: C.gold, fontWeight: 600 }}>inutilement</span>.
+              Évitez les surcoûts et les dégradations grâce à{" "}
+              <span style={{ color: C.gold, fontWeight: 600 }}>un accompagnement spécialisé</span>.
             </p>
           </div>
         </AnimDiv>
@@ -607,51 +765,257 @@ function ProblemSection() {
   );
 }
 
-function PromiseSection() {
+function PromiseSection({ setPage }) {
+  const [activePop, setActivePop] = useState(null);
   const principles = [
-    { icon: Wind, label: "Murs perspirants" },
-    { icon: Thermometer, label: "Forte inertie thermique" },
-    { icon: Droplets, label: "Régulation naturelle de l'humidité" },
-    { icon: Sun, label: "Conception bioclimatique" },
+    {
+      icon: Wind,
+      label: "Murs perspirants",
+      text: "Les murs anciens respirent naturellement, régulant humidité et température. Obstruer cette respirabilité génère condensation, moisissures et dégradations structurelles.",
+      page: "methode",
+    },
+    {
+      icon: Thermometer,
+      label: "Forte inertie thermique",
+      text: "La pierre, la terre crue et le bois massif accumulent la chaleur le jour et la restituent la nuit, assurant un confort thermique naturel sans système de chauffage complexe.",
+      page: "methode",
+    },
+    {
+      icon: Leaf,
+      label: "Matériaux naturels",
+      text: "Chaux, chanvre, terre crue, enduits à la chaux — ces matériaux sont compatibles avec la structure ancienne. Ils s'auto-régulent, sont durables et réparables à moindre coût.",
+      page: "methode",
+    },
   ];
   return (
     <section style={{ padding: "5rem 2rem", background: C.cream }}>
       <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
         <SectionTitle
           title={<>La meilleure solution n'est pas la plus chère.<br /><span style={{ color: C.goldDark }}>C'est celle qui respecte le bâtiment.</span></>}
-          subtitle="Le bâti ancien fonctionne différemment :"
+          subtitle="Le bâti ancien fonctionne selon trois principes fondamentaux :"
         />
-        <div className="resp-grid-2" style={{display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"1.5rem", marginBottom:"3rem"}}>
+        <div className="resp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
           {principles.map((item, i) => (
             <AnimDiv key={i} delay={i * 100}>
               <div
-                style={{
-                  background: C.white, borderRadius: "0.75rem",
-                  border: `1px solid ${C.border}`,
-                  padding: "1.75rem 1.25rem", textAlign: "center",
-                  transition: "box-shadow 0.3s ease",
-                }}
+                style={{ background: C.white, border: `1px solid ${C.border}`, padding: "2rem 1.5rem", textAlign: "center", transition: "box-shadow 0.3s ease", position: "relative" }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = "0 10px 30px rgba(61,54,46,0.1)"}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
               >
-                <div style={{ margin: "0 auto 1rem", width: 48, height: 48, borderRadius: "50%", background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <item.icon size={22} style={{ color: C.goldDark }} />
+                <div style={{ margin: "0 auto 1rem", width: 52, height: 52, borderRadius: "50%", background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <item.icon size={24} style={{ color: C.goldDark }} aria-hidden="true" />
                 </div>
-                <p style={{ fontFamily: body, color: C.darkMid, fontSize: "0.95rem", fontWeight: 500 }}>{item.label}</p>
+                <p style={{ fontFamily: serif, color: C.dark, fontSize: "1.05rem", fontWeight: 600, marginBottom: "0.65rem" }}>{item.label}</p>
+                <p style={{ fontFamily: body, color: C.mid, fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1rem" }}>{item.text}</p>
+                <button
+                  onClick={() => setPage && setPage(item.page)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: C.goldDark, fontFamily: body, fontSize: "0.85rem", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: "3px", padding: 0 }}
+                  aria-label={`En savoir plus sur ${item.label}`}
+                >
+                  En savoir plus →
+                </button>
               </div>
             </AnimDiv>
           ))}
         </div>
         <AnimDiv>
-          <div style={{ background: C.white, borderRadius: "1rem", border: `1px solid ${C.border}`, padding: "2.5rem 3rem", textAlign: "center" }}>
+          <div style={{ background: C.white, border: `1px solid ${C.border}`, padding: "2.5rem 3rem", textAlign: "center" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-              <Check size={18} style={{ color: "#22c55e" }} />
+              <Check size={18} style={{ color: "#22c55e" }} aria-hidden="true" />
               <span style={{ color: "#16a34a", fontFamily: body, fontWeight: 600, fontSize: "0.9rem" }}>La clé</span>
             </div>
             <p style={{ fontFamily: serif, fontSize: "clamp(1.05rem, 2vw, 1.3rem)", color: C.dark, maxWidth: "40rem", margin: "0 auto", lineHeight: 1.65 }}>
-              Lorsque ces principes sont compris, les travaux deviennent plus simples, plus durables… et{" "}
+              Lorsque ces principes sont compris, les travaux deviennent plus simples, plus durables et{" "}
               <span style={{ color: C.goldDark, fontWeight: 600 }}>beaucoup moins coûteux</span>.
             </p>
+          </div>
+        </AnimDiv>
+      </div>
+    </section>
+  );
+}
+
+function ServicesSection({ setPage }) {
+  const services = [
+    {
+      icon: Search,
+      title: "Diagnostic et expertise",
+      desc: "Analyse complète de votre bâtiment sur site : structure, humidité, matériaux, pathologies. Livrable : rapport détaillé avec préconisations hiérarchisées et chiffrage indicatif.",
+      details: ["Visite sur site (1 à 2 jours)", "Rapport écrit illustré", "Préconisations techniques et budgétaires", "Réponse aux interrogations des artisans"],
+    },
+    {
+      icon: ClipboardList,
+      title: "Assistance à la maîtrise d'ouvrage",
+      desc: "Accompagnement tout au long du chantier : sélection des artisans compétents en bâti ancien, validation des devis, contrôle de l'avancement et réception des travaux.",
+      details: ["Consultation et sélection des artisans", "Analyse des devis et négociation", "Visites de chantier régulières", "Réception et levée des réserves"],
+    },
+    {
+      icon: Layers,
+      title: "Conseil matériaux et techniques",
+      desc: "Choix des matériaux adaptés au bâti ancien et aux contraintes patrimoniales : chaux, chanvre, enduits traditionnels, bois. Respect des règles des Architectes des Bâtiments de France si nécessaire.",
+      details: ["Sélection des matériaux compatibles", "Respect des règles patrimoniales", "Conseil sur les fournisseurs spécialisés", "Formation de vos artisans si besoin"],
+    },
+  ];
+  return (
+    <section style={{ padding: "5rem 2rem", background: C.white }}>
+      <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
+        <SectionTitle title="Nos prestations" subtitle="Un accompagnement sur mesure à chaque étape de votre projet." />
+        <div className="resp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
+          {services.map((s, i) => (
+            <AnimDiv key={i} delay={i * 100}>
+              <div style={{ display: "flex", flexDirection: "column", height: "100%", border: `1px solid ${C.border}`, background: C.cream, transition: "box-shadow 0.3s ease" }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 10px 30px rgba(61,54,46,0.1)"}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
+              >
+                <div style={{ padding: "2rem", borderBottom: `1px solid ${C.border}` }}>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
+                    <s.icon size={22} style={{ color: C.goldDark }} aria-hidden="true" />
+                  </div>
+                  <h3 style={{ fontFamily: serif, fontSize: "1.15rem", fontWeight: 700, color: C.dark, marginBottom: "0.75rem" }}>{s.title}</h3>
+                  <p style={{ fontFamily: body, color: C.mid, fontSize: "0.9rem", lineHeight: 1.7 }}>{s.desc}</p>
+                </div>
+                <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {s.details.map((d, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem" }}>
+                      <Check size={14} style={{ color: C.goldDark, flexShrink: 0, marginTop: "3px" }} aria-hidden="true" />
+                      <span style={{ fontFamily: body, fontSize: "0.85rem", color: C.darkMid, lineHeight: 1.55 }}>{d}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ padding: "1.25rem 2rem", borderTop: `1px solid ${C.border}` }}>
+                  <button
+                    onClick={() => setPage && setPage("contact")}
+                    aria-label={`Prendre rendez-vous pour ${s.title}`}
+                    style={{ width: "100%", padding: "0.75rem", background: `linear-gradient(135deg, ${C.gold}, ${C.goldDeep})`, border: "none", cursor: "pointer", fontFamily: body, fontSize: "0.9rem", fontWeight: 600, color: C.white, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                  >
+                    <Phone size={14} aria-hidden="true" /> Prendre rendez-vous
+                  </button>
+                </div>
+              </div>
+            </AnimDiv>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProcessSection() {
+  const steps = [
+    { icon: Phone, num: "01", title: "Prise de contact", desc: "Un appel ou un formulaire en ligne pour décrire votre projet. Nous évaluons ensemble la pertinence d'un diagnostic." },
+    { icon: MapPin, num: "02", title: "Visite et diagnostic", desc: "Analyse sur site du bâtiment : structure, matériaux, humidité, pathologies. Prises de mesures et documentation photographique." },
+    { icon: FileText, num: "03", title: "Rapport et recommandations", desc: "Livraison d'un document clair, pédagogique et hiérarchisé : ce qui est urgent, ce qui peut attendre, les matériaux adaptés." },
+    { icon: Users, num: "04", title: "Suivi et accompagnement", desc: "Mise en relation avec des artisans compétents, validation des devis, contrôle des travaux et réception du chantier." },
+  ];
+  return (
+    <section style={{ padding: "5rem 2rem", background: C.dark }}>
+      <div style={{ maxWidth: "72rem", margin: "0 auto" }}>
+        <SectionTitle light title="Comment se déroule un accompagnement ?" subtitle="Quatre étapes simples et transparentes." />
+        <div className="resp-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "0", marginTop: "3rem" }}>
+          {steps.map((s, i) => (
+            <AnimDiv key={i} delay={i * 120}>
+              <div style={{ padding: "2rem 1.5rem", borderRight: i < steps.length - 1 ? `1px solid rgba(255,255,255,0.08)` : "none", textAlign: "center", position: "relative" }}>
+                {i < steps.length - 1 && (
+                  <div style={{ position: "absolute", top: "3rem", right: "-1px", width: "0", zIndex: 2 }}>
+                    <div style={{ position: "absolute", top: "-6px", right: "-8px", width: 14, height: 14, borderRadius: "50%", background: C.gold, border: `2px solid ${C.dark}` }} />
+                  </div>
+                )}
+                <div style={{ margin: "0 auto 1.25rem", width: 56, height: 56, borderRadius: "50%", background: `${C.gold}20`, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <s.icon size={24} style={{ color: C.gold }} aria-hidden="true" />
+                </div>
+                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.12em", color: `${C.gold}80`, marginBottom: "0.5rem" }}>{s.num}</p>
+                <h4 style={{ fontFamily: serif, fontSize: "1.05rem", fontWeight: 700, color: C.white, marginBottom: "0.75rem", lineHeight: 1.3 }}>{s.title}</h4>
+                <p style={{ fontFamily: body, color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", lineHeight: 1.7 }}>{s.desc}</p>
+              </div>
+            </AnimDiv>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TestimonialsSection() {
+  const [idx, setIdx] = useState(0);
+  const [beforeAfter, setBeforeAfter] = useState(50);
+  const testimonials = [
+    { initials: "M.D.", name: "Marie D.", project: "Maison XVIIIe - Corrèze", quote: "Grâce à OPTIMA, nous avons restauré notre maison du XVIIIe siècle sans dépassement de budget. Laurent a identifié les vrais problèmes là où trois artisans avaient proposé des travaux inutiles." },
+    { initials: "P.L.", name: "Pierre L.", project: "Château - Périgord", quote: "Un accompagnement exceptionnel pour notre château. Le rapport de diagnostic nous a permis d'économiser plus de 40 000 euros en évitant une reprise structurelle inutile." },
+    { initials: "S.R.", name: "Sophie R.", project: "Moulin - Lot", quote: "Je cherchais quelqu'un qui comprenne vraiment le bâti ancien. Laurent a tout de suite identifié les problèmes d'humidité que les autres confondaient avec des remontées capillaires." },
+  ];
+  return (
+    <section style={{ padding: "5rem 2rem", background: C.cream }}>
+      <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
+        <SectionTitle title="Ce que disent nos clients" subtitle="Des propriétaires qui ont fait confiance à l'expertise OPTIMA." />
+
+        {/* Carrousel témoignages */}
+        <AnimDiv>
+          <div style={{ background: C.white, border: `1px solid ${C.border}`, padding: "3rem", marginBottom: "4rem", position: "relative" }}>
+            <div style={{ marginBottom: "1.75rem" }}>
+              <Quote size={36} style={{ color: `${C.gold}60` }} aria-hidden="true" />
+            </div>
+            <blockquote style={{ fontFamily: serif, fontSize: "clamp(1.05rem, 2vw, 1.25rem)", color: C.dark, lineHeight: 1.7, fontStyle: "italic", marginBottom: "1.5rem" }}>
+              "{testimonials[idx].quote}"
+            </blockquote>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.gold}20`, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.7rem", fontWeight: 600, color: C.goldDark }}>{testimonials[idx].initials}</span>
+              </div>
+              <div>
+                <p style={{ fontFamily: body, fontWeight: 600, color: C.dark, fontSize: "0.95rem" }}>{testimonials[idx].name}</p>
+                <p style={{ fontFamily: body, color: C.mid, fontSize: "0.82rem" }}>{testimonials[idx].project}</p>
+              </div>
+            </div>
+            {/* Nav */}
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem", justifyContent: "flex-end" }}>
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIdx(i)}
+                  aria-label={`Témoignage de ${testimonials[i].name}`}
+                  style={{ width: i === idx ? 24 : 8, height: 8, borderRadius: 4, background: i === idx ? C.gold : C.border, border: "none", cursor: "pointer", padding: 0, transition: "width 0.3s ease, background 0.3s ease" }}
+                />
+              ))}
+            </div>
+          </div>
+        </AnimDiv>
+
+        {/* Avant/Après */}
+        <AnimDiv>
+          <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
+            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.14em", color: C.goldDark, marginBottom: "0.5rem" }}>Avant / Après restauration</p>
+            <p style={{ fontFamily: body, color: C.mid, fontSize: "0.9rem" }}>Faites glisser le curseur pour comparer</p>
+          </div>
+          <div
+            style={{ position: "relative", height: "320px", overflow: "hidden", cursor: "col-resize", userSelect: "none", border: `1px solid ${C.border}` }}
+            onMouseMove={e => { const r = e.currentTarget.getBoundingClientRect(); setBeforeAfter(Math.round(((e.clientX - r.left) / r.width) * 100)); }}
+            onTouchMove={e => { const r = e.currentTarget.getBoundingClientRect(); setBeforeAfter(Math.round(((e.touches[0].clientX - r.left) / r.width) * 100)); }}
+            role="img"
+            aria-label="Comparaison avant et après restauration d'un mur en pierre ancienne"
+          >
+            {/* Avant */}
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #6b5a4e 0%, #8c7060 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
+                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>Avant</p>
+                <p style={{ fontFamily: serif, fontSize: "1rem" }}>Mur dégradé — ciment, humidité</p>
+              </div>
+            </div>
+            {/* Après */}
+            <div style={{ position: "absolute", inset: 0, clipPath: `inset(0 ${100 - beforeAfter}% 0 0)`, background: "linear-gradient(135deg, #c4a45e 0%, #d4b87a 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.9)" }}>
+                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>Après</p>
+                <p style={{ fontFamily: serif, fontSize: "1rem" }}>Enduit à la chaux restauré</p>
+              </div>
+            </div>
+            {/* Handle */}
+            <div style={{ position: "absolute", top: 0, bottom: 0, left: `${beforeAfter}%`, transform: "translateX(-50%)", width: 3, background: C.white, pointerEvents: "none" }}>
+              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 36, height: 36, borderRadius: "50%", background: C.white, boxShadow: "0 2px 12px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+                <ChevronDown size={12} style={{ transform: "rotate(90deg)", color: C.goldDark }} aria-hidden="true" />
+                <ChevronDown size={12} style={{ transform: "rotate(-90deg)", color: C.goldDark }} aria-hidden="true" />
+              </div>
+            </div>
           </div>
         </AnimDiv>
       </div>
@@ -664,12 +1028,11 @@ function HomePage({ setPage }) {
     <div>
       <HeroSection setPage={setPage} />
       <ProblemSection />
-      <PromiseSection />
-      <section style={{ padding: "5rem 2rem", background: C.white }}>
-        <div style={{ maxWidth: "64rem", margin: "0 auto" }}>
-          <CTABanner variant="dark" />
-        </div>
-      </section>
+      <PromiseSection setPage={setPage} />
+      <ServicesSection setPage={setPage} />
+      <ProcessSection />
+      <TestimonialsSection />
+      <CTABanner variant="dark" setPage={setPage} />
     </div>
   );
 }
